@@ -2,87 +2,1077 @@
 @import "tw-animate-css";
 @import "../vendor/shadcn-tailwind-4.13.0.css";
 
-:root { color-scheme: dark; --rose: #ff2d6f; --hot: #ff0a54; --soft: #ff8fb4; }
-* { box-sizing: border-box; }
-html, body { width: 100%; min-height: 100%; margin: 0; background: #030107; overflow: hidden; }
-body { font-family: "Segoe UI", ui-sans-serif, system-ui, -apple-system, sans-serif; }
-button { font: inherit; }
-.love-page { position: fixed; inset: 0; min-height: 100svh; overflow: hidden; color: white; isolation: isolate; background: radial-gradient(circle at 50% 44%, #250718 0%, #09030c 40%, #020104 76%); }
-.love-page::before { content: ""; position: absolute; inset: 0; opacity: .3; pointer-events: none; background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px); background-size: 44px 44px; mask-image: radial-gradient(circle, #000 5%, transparent 70%); }
-.ambient { position: absolute; width: 42vw; aspect-ratio: 1; border-radius: 50%; filter: blur(110px); opacity: .2; pointer-events: none; }
-.ambient-one { left: -18vw; top: -15vw; background: #ff126b; animation: ambientMove 10s ease-in-out infinite alternate; }
-.ambient-two { right: -20vw; bottom: -17vw; background: #7b18ff; animation: ambientMove 12s 2s ease-in-out infinite alternate-reverse; }
-.star-field { position: absolute; inset: 0; pointer-events: none; }
-.star { position: absolute; display: block; border-radius: 50%; background: white; box-shadow: 0 0 7px #fff, 0 0 15px #ff7aac; animation: twinkle ease-in-out infinite; }
-.intro-scene, .opening-scene, .universe-scene { position: absolute; inset: 0; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .7s ease, visibility .7s; }
-.intro-scene.is-visible, .opening-scene.is-visible, .universe-scene.is-visible { opacity: 1; visibility: visible; pointer-events: auto; }
-.intro-scene { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px 20px max(24px, env(safe-area-inset-bottom)); text-align: center; }
-.eyebrow { display: flex; align-items: center; gap: 8px; margin: 0 0 18px; color: #ffacc8; font-size: clamp(.72rem, 2.5vw, .84rem); font-weight: 700; letter-spacing: .18em; text-transform: uppercase; animation: fadeUp .8s both; }
-.intro-scene h1 { margin: 0; max-width: 820px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.25rem, 7.2vw, 5.4rem); font-weight: 500; line-height: .98; letter-spacing: -.055em; text-shadow: 0 5px 35px rgba(0,0,0,.6); animation: fadeUp .8s .12s both; }
-.intro-scene h1 span { display: inline-block; padding-bottom: .08em; color: transparent; background: linear-gradient(92deg, #ff93b6 0%, #fff 48%, #ff4d89 100%); background-clip: text; -webkit-background-clip: text; }
-.intro-copy { max-width: 520px; margin: 18px 0 8px; color: rgba(255,255,255,.67); font-size: clamp(.95rem, 3vw, 1.08rem); line-height: 1.65; animation: fadeUp .8s .2s both; }
-.gift-button { position: relative; width: 240px; height: 255px; margin-top: 2px; border: 0; color: white; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; perspective: 800px; animation: fadeUp .8s .28s both; }
-.gift-button:focus-visible { outline: 2px solid #ff80ac; outline-offset: 7px; border-radius: 30px; }
-.gift-aura { position: absolute; left: 50%; top: 50%; width: 150px; height: 150px; translate: -50% -48%; border-radius: 50%; background: #ff2a72; filter: blur(40px); opacity: .26; animation: auraPulse 2.6s ease-in-out infinite; }
-.gift-box { position: absolute; left: 50%; top: 48%; width: 124px; height: 112px; translate: -50% -50%; filter: drop-shadow(0 25px 28px rgba(0,0,0,.48)); animation: giftFloat 3s ease-in-out infinite; transition: transform .3s ease; }
-.gift-button:hover .gift-box { transform: scale(1.07) rotate(-2deg); }
-.gift-body { position: absolute; inset: 28px 5px 0; overflow: hidden; border: 1px solid rgba(255,255,255,.35); border-radius: 8px 8px 14px 14px; background: linear-gradient(145deg, #e60f4f, #9b0738); box-shadow: inset 12px 0 25px rgba(255,255,255,.12), inset -15px -12px 28px rgba(64,0,23,.3); }
-.gift-ribbon { position: absolute; inset: 0 auto 0 50%; width: 24px; translate: -50%; background: linear-gradient(90deg, #ffd5a7, #fff1cc 48%, #e5aa72); box-shadow: 0 0 12px rgba(255,237,202,.4); }
-.gift-heart { position: absolute; left: 50%; top: 49%; width: 18px; translate: -50% -50%; color: #bb0b46; filter: drop-shadow(0 1px 0 #fff4); }
-.gift-lid { position: absolute; z-index: 2; left: -3px; top: 18px; width: 130px; height: 34px; border: 1px solid rgba(255,255,255,.35); border-radius: 9px; background: linear-gradient(165deg, #fa326f, #b4083f); box-shadow: 0 5px 12px rgba(45,0,15,.4); }
-.gift-lid::after { content: ""; position: absolute; left: 50%; inset-block: 0; width: 26px; translate: -50%; background: linear-gradient(90deg, #f1bd80, #fff0ca, #daa064); }
-.gift-bow { position: absolute; z-index: -1; left: 50%; top: -31px; width: 72px; height: 42px; translate: -50%; }
-.gift-bow i { position: absolute; width: 40px; height: 33px; border: 9px solid #ffdca8; box-shadow: inset 0 0 7px #b66f39, 0 3px 8px #0005; }
-.gift-bow i:first-child { left: 0; border-radius: 70% 30% 70% 35%; transform: rotate(18deg); }
-.gift-bow i:last-child { right: 0; border-radius: 30% 70% 35% 70%; transform: rotate(-18deg); }
-.tap-hint { position: absolute; left: 50%; bottom: 8px; translate: -50%; white-space: nowrap; color: rgba(255,255,255,.75); font-size: .86rem; letter-spacing: .05em; animation: tapPulse 1.7s ease-in-out infinite; }
-.tap-hint span { color: #ff4e86; }
-.signature { position: absolute; bottom: max(20px, env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,.38); font-family: Georgia, serif; font-size: .82rem; letter-spacing: .17em; }
-.signature svg { color: #ff427d; }
-.opening-scene { display: grid; place-items: center; overflow: hidden; background: radial-gradient(circle, #e81457 0%, #620524 35%, #090108 72%); }
-.opening-scene.is-visible { animation: openingFlash 1.25s ease both; }
-.burst-heart { position: absolute; width: min(31vw, 180px); height: min(31vw, 180px); color: #ff2b68; filter: drop-shadow(0 0 38px #ff2366); animation: heartBurst 1.2s cubic-bezier(.2,.8,.2,1) both; }
-.burst-ring { position: absolute; width: 120px; aspect-ratio: 1; border: 1px solid #ffc0d5; border-radius: 50%; box-shadow: 0 0 36px #ff2366, inset 0 0 36px #ff2366; animation: ringBurst 1.15s ease-out both; }
-.ring-two { animation-delay: .18s; }
-.opening-scene p { position: absolute; bottom: 19%; color: #ffdce8; font-family: Georgia, serif; font-size: clamp(1rem, 4vw, 1.35rem); letter-spacing: .08em; animation: fadeUp .6s .25s both; }
-.universe-scene { overflow: hidden; background: radial-gradient(ellipse at center, #1d061b 0%, #08020b 42%, #010103 76%); perspective: 900px; }
-.universe-scene.is-visible { animation: universeIn 1.2s ease both; }
-.vortex { position: absolute; left: 50%; top: 50%; width: min(95vmax, 1000px); aspect-ratio: 1; translate: -50% -50%; opacity: .35; transform: rotateX(66deg); }
-.vortex i { position: absolute; inset: calc(var(--i, 0) * 10%); border: 1px solid rgba(255,50,130,.3); border-radius: 50%; box-shadow: 0 0 20px rgba(255,20,100,.22), inset 0 0 20px rgba(255,20,100,.18); animation: vortexSpin 18s linear infinite; }
-.vortex i:nth-child(1) { --i: 0; border-style: dashed; }.vortex i:nth-child(2) { --i: 1; animation-direction: reverse; animation-duration: 13s; }.vortex i:nth-child(3) { --i: 2; border-style: dotted; animation-duration: 9s; }.vortex i:nth-child(4) { --i: 3; animation-direction: reverse; }
-.note-space, .heart-space { position: absolute; inset: 0; transform-style: preserve-3d; pointer-events: none; }
-.floating-note { position: absolute; white-space: nowrap; font-weight: 600; font-size: clamp(.68rem, 2.1vw, 1.05rem); letter-spacing: .01em; opacity: .12; text-shadow: 0 0 6px currentColor, 0 0 17px currentColor; transform: translate(-50%,-50%) translateZ(var(--z)) rotate(var(--rot)) scale(var(--scale)); animation: flyThrough linear infinite; }
-.floating-note.pink { color: #ff3f92; }.floating-note.white { color: #ffe4ef; }
-.flying-heart { position: absolute; opacity: .25; filter: drop-shadow(0 0 8px currentColor); animation: heartDrift ease-in-out infinite; }
-.love-card { position: absolute; z-index: 5; left: 50%; top: 50%; width: min(88vw, 590px); padding: clamp(30px, 6vw, 58px) clamp(24px, 7vw, 64px); translate: -50% -50%; overflow: hidden; border: 1px solid rgba(255,149,188,.3); border-radius: 34px; text-align: center; background: linear-gradient(145deg, rgba(33,4,23,.68), rgba(8,2,12,.78)); box-shadow: 0 30px 100px #000c, inset 0 1px 0 rgba(255,255,255,.14), 0 0 70px rgba(255,20,104,.12); backdrop-filter: blur(15px); animation: cardEnter 1.2s .25s cubic-bezier(.16,1,.3,1) both; }
-.love-card::before { content: ""; position: absolute; inset: -1px; border-radius: inherit; background: radial-gradient(circle at 50% 0%, rgba(255,126,175,.22), transparent 43%); pointer-events: none; }
-.mini-label { position: relative; color: #ff8eb5; font-size: .67rem; font-weight: 800; letter-spacing: .28em; }
-.love-card h2 { position: relative; display: flex; justify-content: center; align-items: center; gap: clamp(12px, 4vw, 25px); margin: 17px 0 18px; font-family: Georgia, serif; font-size: clamp(3.1rem, 12vw, 6.4rem); font-weight: 500; letter-spacing: -.07em; line-height: .9; text-shadow: 0 0 32px rgba(255,255,255,.18); }
-.love-card h2 svg { width: clamp(31px, 8vw, 58px); height: auto; color: #ff2469; filter: drop-shadow(0 0 16px #ff2469); animation: heartbeat 1.45s ease-in-out infinite; }
-.love-card p { position: relative; max-width: 445px; margin: 0 auto; color: rgba(255,255,255,.72); font-size: clamp(.95rem, 3.4vw, 1.12rem); line-height: 1.7; }
-.love-card strong { position: relative; display: block; margin-top: 17px; color: #ffc0d5; font-family: Georgia, serif; font-size: clamp(1.2rem, 4vw, 1.55rem); font-style: italic; font-weight: 500; }
-.forever { position: relative; display: block; margin-top: 23px; color: rgba(255,255,255,.35); font-size: .67rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
-.orbit { position: absolute; inset: -110px; border: 1px solid rgba(255,100,160,.12); border-radius: 50%; animation: vortexSpin 15s linear infinite; }
-.orbit i { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #ff73a5; box-shadow: 0 0 14px #ff2973; }
-.orbit i:nth-child(1) { left: 21%; top: 10%; }.orbit i:nth-child(2) { right: 7%; top: 49%; }.orbit i:nth-child(3) { left: 35%; bottom: 3%; }
-.controls { position: absolute; z-index: 8; right: max(18px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); display: flex; gap: 9px; }
-.controls button { display: flex; min-width: 44px; height: 44px; align-items: center; justify-content: center; gap: 8px; padding: 0 14px; border: 1px solid rgba(255,255,255,.15); border-radius: 999px; color: rgba(255,255,255,.75); background: rgba(16,5,15,.55); backdrop-filter: blur(12px); cursor: pointer; transition: .25s ease; }
-.controls button:last-child { padding: 0; }.controls button:hover { color: white; border-color: rgba(255,91,148,.6); background: rgba(255,36,105,.18); transform: translateY(-2px); }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes twinkle { 0%,100% { opacity: .15; transform: scale(.6); } 50% { opacity: .95; transform: scale(1.2); } }
-@keyframes ambientMove { to { transform: translate(12vw, 7vh) scale(1.15); } }
-@keyframes auraPulse { 50% { opacity: .44; transform: scale(1.22); } }
-@keyframes giftFloat { 0%,100% { translate: -50% -48%; rotate: -1deg; } 50% { translate: -50% -58%; rotate: 1deg; } }
-@keyframes tapPulse { 50% { opacity: .48; transform: translateY(3px); } }
-@keyframes openingFlash { 0% { opacity: 0; transform: scale(.7); } 28% { opacity: 1; } 100% { opacity: 1; transform: scale(1.18); } }
-@keyframes heartBurst { 0% { transform: scale(.2) rotate(-15deg); opacity: 0; } 38% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(8); opacity: 0; } }
-@keyframes ringBurst { from { transform: scale(.1); opacity: 1; } to { transform: scale(9); opacity: 0; } }
-@keyframes universeIn { from { opacity: 0; filter: blur(13px); transform: scale(1.2); } to { opacity: 1; filter: blur(0); transform: scale(1); } }
-@keyframes vortexSpin { to { rotate: 360deg; } }
-@keyframes flyThrough { 0% { opacity: 0; transform: translate(-50%,-50%) translateZ(-900px) rotate(var(--rot)) scale(.25); } 22% { opacity: .55; } 75% { opacity: .32; } 100% { opacity: 0; transform: translate(-50%,-50%) translateZ(420px) rotate(var(--rot)) scale(calc(var(--scale) * 1.5)); } }
-@keyframes heartDrift { 0%,100% { opacity: .08; transform: translate3d(-15px,18px,-100px) rotate(-15deg) scale(.65); } 50% { opacity: .68; transform: translate3d(18px,-24px,80px) rotate(15deg) scale(1.12); } }
-@keyframes cardEnter { from { opacity: 0; translate: -50% -44%; scale: .78; filter: blur(15px); } to { opacity: 1; translate: -50% -50%; scale: 1; filter: blur(0); } }
-@keyframes heartbeat { 0%,100% { transform: scale(1); } 12% { transform: scale(1.16); } 25% { transform: scale(1); } 36% { transform: scale(1.1); } 52% { transform: scale(1); } }
-@media (max-height: 720px) { .intro-scene { justify-content: flex-start; padding-top: 7vh; }.eyebrow { margin-bottom: 11px; }.intro-copy { margin-top: 10px; }.gift-button { height: 215px; }.gift-box { scale: .84; } }
-@media (max-width: 520px) { .love-card { border-radius: 26px; }.controls button span { display: none; }.controls button { padding: 0; }.intro-scene h1 { letter-spacing: -.045em; } }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; } }
+:root {
+  color-scheme: dark;
+  --gold: #ffd166;
+  --amber: #ff9f1c;
+  --moon-glow: rgba(255, 223, 133, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  background: #050410;
+  overflow: hidden;
+}
+
+body {
+  font-family: "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  font: inherit;
+}
+
+/* ================= PAGE CONTAINER ================= */
+.autumn-page {
+  position: fixed;
+  inset: 0;
+  min-height: 100svh;
+  overflow: hidden;
+  color: white;
+  isolation: isolate;
+  background: radial-gradient(ellipse at 50% 25%, #180f33 0%, #0d0822 45%, #04030d 85%);
+}
+
+.autumn-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: .2;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,.015) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Ambient moonlight haze */
+.moon-ambient {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(140px);
+  pointer-events: none;
+}
+
+.moon-ambient-gold {
+  right: -5vw;
+  top: -10vw;
+  width: 50vw;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(255, 193, 7, 0.28), rgba(255, 140, 0, 0.12), transparent);
+  animation: ambientFloat 14s ease-in-out infinite alternate;
+}
+
+.moon-ambient-violet {
+  left: -15vw;
+  bottom: -10vw;
+  width: 55vw;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(123, 31, 162, 0.22), transparent);
+  animation: ambientFloat 16s 2s ease-in-out infinite alternate-reverse;
+}
+
+/* Starfield */
+.star-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.autumn-star {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 0 5px #fff, 0 0 10px #ffe599;
+  animation: starTwinkle ease-in-out infinite;
+}
+
+/* Shooting stars */
+.shooting-stars-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.shooting-star {
+  position: absolute;
+  width: 140px;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 235, 160, 0.9), transparent);
+  transform: rotate(-35deg);
+  opacity: 0;
+  animation: shootingStarAnim linear infinite;
+}
+
+/* Scene transitions */
+.intro-scene, .opening-scene, .moonlight-scene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .8s ease, visibility .8s;
+}
+
+.intro-scene.is-visible, .opening-scene.is-visible, .moonlight-scene.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* ================= PHASE 1: INTRO SCENE ================= */
+.intro-scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px max(24px, env(safe-area-inset-bottom));
+  text-align: center;
+}
+
+.autumn-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  color: #ffd166;
+  font-size: clamp(.72rem, 2.5vw, .84rem);
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  animation: fadeUp .8s both;
+}
+
+.intro-title {
+  margin: 0;
+  max-width: 820px;
+  font-family: "Playfair Display", "Be Vietnam Pro", Georgia, serif;
+  font-size: clamp(2.35rem, 7.2vw, 5.2rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+  text-shadow: 0 5px 35px rgba(0,0,0,.6);
+  animation: fadeUp .8s .12s both;
+}
+
+.intro-title span {
+  display: inline-block;
+  color: transparent;
+  background: linear-gradient(92deg, #ffe082 0%, #ffffff 45%, #ffa726 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.intro-copy {
+  max-width: 520px;
+  margin: 18px 0 16px;
+  color: rgba(255, 255, 255, .82);
+  font-size: clamp(.96rem, 3vw, 1.1rem);
+  line-height: 1.7;
+  animation: fadeUp .8s .2s both;
+}
+
+/* Lantern Starter Button */
+.lantern-starter-button {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+  border: 0;
+  color: white;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  animation: fadeUp .8s .28s both;
+}
+
+.starter-aura {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  width: 170px;
+  height: 170px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 179, 0, 0.45), transparent 70%);
+  filter: blur(35px);
+  animation: auraPulse 2.8s ease-in-out infinite;
+}
+
+.lantern-prop {
+  position: relative;
+  width: 140px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: lanternFloat 3s ease-in-out infinite;
+  transition: transform .3s ease;
+}
+
+.lantern-starter-button:hover .lantern-prop {
+  transform: scale(1.1) rotate(-3deg);
+}
+
+.prop-star-lantern {
+  position: relative;
+  font-size: 72px;
+  filter: drop-shadow(0 0 25px rgba(255, 179, 0, 0.75));
+  animation: starLanternSway 3s ease-in-out infinite alternate;
+}
+
+.tap-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 8px 20px;
+  border-radius: 999px;
+  background: rgba(255, 193, 7, 0.16);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  backdrop-filter: blur(8px);
+  color: #ffe082;
+  font-size: .9rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  box-shadow: 0 0 20px rgba(255, 160, 0, 0.25);
+  animation: tapPulse 1.8s ease-in-out infinite;
+}
+
+.tap-hint span {
+  color: #ff4d6d;
+}
+
+.autumn-signature {
+  position: absolute;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 235, 160, .55);
+  font-family: "Playfair Display", serif;
+  font-size: .88rem;
+  letter-spacing: .12em;
+}
+
+.autumn-signature svg {
+  color: #ff3366;
+}
+
+/* ================= PHASE 2: OPENING SCENE ================= */
+.opening-scene {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: radial-gradient(circle, #3d1c5a 0%, #150a29 50%, #05030e 85%);
+}
+
+.opening-scene.is-visible {
+  animation: openingFlash 1.25s ease both;
+}
+
+.moon-burst {
+  position: absolute;
+  width: min(40vw, 220px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff3b0 0%, #ffb703 60%, transparent 80%);
+  box-shadow: 0 0 80px #ffa726;
+  animation: moonBurstAnim 1.2s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.moon-ring-burst {
+  position: absolute;
+  width: 140px;
+  aspect-ratio: 1;
+  border: 2px solid #ffd54f;
+  border-radius: 50%;
+  box-shadow: 0 0 45px #ffb300, inset 0 0 45px #ffb300;
+  animation: ringBurstAnim 1.2s ease-out both;
+}
+
+.big-lantern-icon {
+  font-size: 80px;
+  filter: drop-shadow(0 0 35px #ffa000);
+  animation: lanternPop 1.2s cubic-bezier(.17,.89,.32,1.28) both;
+}
+
+.opening-text {
+  position: absolute;
+  bottom: 20%;
+  color: #fff8e1;
+  font-family: "Playfair Display", "Be Vietnam Pro", serif;
+  font-size: clamp(1.15rem, 4vw, 1.45rem);
+  letter-spacing: .06em;
+  animation: fadeUp .6s .25s both;
+}
+
+/* ================= PHASE 3: MOONLIGHT SCENE ================= */
+.moonlight-scene {
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 30%, #1c1039 0%, #0e0926 48%, #03020a 85%);
+}
+
+.moonlight-scene.is-visible {
+  animation: moonlightIn 1.1s ease both;
+}
+
+/* 1. MẶT TRĂNG RẰM KHỔNG LỒ (VÀNG RỰC RỠ) */
+.full-moon-container {
+  position: absolute;
+  top: max(4vh, 25px);
+  right: max(6vw, 25px);
+  width: clamp(120px, 18vw, 200px);
+  aspect-ratio: 1;
+  cursor: pointer;
+  z-index: 5;
+  transition: transform .3s ease;
+}
+
+.full-moon-container:hover {
+  transform: scale(1.05);
+}
+
+.moon-glow-outer {
+  position: absolute;
+  inset: -45%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.35) 0%, rgba(255, 160, 0, 0.12) 50%, transparent 75%);
+  filter: blur(25px);
+  animation: moonPulse 4s ease-in-out infinite alternate;
+}
+
+.moon-glow-inner {
+  position: absolute;
+  inset: -15%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 248, 220, 0.6) 0%, rgba(255, 193, 7, 0.2) 65%, transparent 80%);
+  filter: blur(12px);
+}
+
+.full-moon {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fffdf0 0%, #ffecb3 40%, #ffc107 80%, #ff8f00 100%);
+  box-shadow: 0 0 45px rgba(255, 215, 0, 0.65), inset -10px -10px 25px rgba(230, 81, 0, 0.45);
+  overflow: hidden;
+}
+
+.moon-crater {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(230, 126, 34, 0.25);
+  box-shadow: inset 1px 1px 3px rgba(180, 80, 10, 0.4);
+}
+
+.crater-1 { width: 28%; height: 28%; top: 22%; left: 45%; }
+.crater-2 { width: 18%; height: 18%; top: 58%; left: 30%; }
+.crater-3 { width: 22%; height: 22%; top: 48%; left: 62%; }
+.crater-4 { width: 12%; height: 12%; top: 20%; left: 24%; }
+
+/* Clouds floating across the moon */
+.moon-cloud {
+  position: absolute;
+  height: 22px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), rgba(255, 240, 200, 0.7), transparent);
+  filter: blur(5px);
+  pointer-events: none;
+}
+
+.cloud-top {
+  width: 160%;
+  top: 30%;
+  left: -30%;
+  animation: cloudDrift 18s ease-in-out infinite alternate;
+}
+
+.cloud-bottom {
+  width: 140%;
+  bottom: 25%;
+  right: -20%;
+  animation: cloudDrift 22s 3s ease-in-out infinite alternate-reverse;
+}
+
+/* 2. CHÚ THỎ NGỌC CUNG TRĂNG (TƯƠNG TÁC) */
+.jade-rabbit-container {
+  position: absolute;
+  top: max(16vh, 90px);
+  right: clamp(140px, 22vw, 260px);
+  width: 110px;
+  height: 125px;
+  cursor: pointer;
+  z-index: 8;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.jade-rabbit-container:hover .rabbit-body {
+  transform: translateY(-4px) scale(1.04);
+}
+
+.jade-rabbit-container.is-hopping .rabbit-body {
+  animation: rabbitHopAnim 0.6s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+/* Speech bubble from Rabbit */
+.rabbit-speech-bubble {
+  position: absolute;
+  bottom: 105%;
+  right: -20px;
+  width: max-content;
+  max-width: 240px;
+  padding: 8px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #4a154b;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4), 0 0 15px rgba(255, 215, 0, 0.4);
+  pointer-events: none;
+  animation: bubblePop 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.rabbit-speech-bubble::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 45px;
+  border: 7px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.95);
+}
+
+/* Cloud stand under Rabbit */
+.rabbit-cloud-stand {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  translate: -50% 0;
+  width: 90px;
+  height: 32px;
+}
+
+.cloud-bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff, #e1bee7);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.4);
+}
+
+.cb-1 { width: 42px; height: 30px; left: 0; bottom: 0; }
+.cb-2 { width: 55px; height: 35px; left: 20px; bottom: 3px; }
+.cb-3 { width: 38px; height: 28px; right: 0; bottom: 0; }
+
+/* Rabbit Anatomy */
+.rabbit-body {
+  position: relative;
+  width: 60px;
+  height: 70px;
+  margin: 0 auto;
+  transition: transform .25s ease;
+}
+
+.rabbit-head {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  translate: -50% 0;
+  width: 44px;
+  height: 38px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #f3e5f5 100%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 2;
+}
+
+.rabbit-ear {
+  position: absolute;
+  top: -16px;
+  width: 14px;
+  height: 36px;
+  border-radius: 50% 50% 30% 30%;
+  background: #ffffff;
+  box-shadow: inset 0 -2px 5px rgba(0,0,0,0.06);
+  transform-origin: bottom center;
+}
+
+.ear-left {
+  left: 12px;
+  transform: rotate(-12deg);
+  animation: earTwitchLeft 3.5s ease-in-out infinite;
+}
+
+.ear-right {
+  right: 12px;
+  transform: rotate(12deg);
+  animation: earTwitchRight 3.5s 0.3s ease-in-out infinite;
+}
+
+.ear-inner {
+  position: absolute;
+  inset: 6px 3px 4px;
+  border-radius: 50%;
+  background: #ff80ab;
+  opacity: .55;
+}
+
+.rabbit-eye {
+  position: absolute;
+  top: 16px;
+  width: 5px;
+  height: 7px;
+  border-radius: 50%;
+  background: #c2185b;
+}
+
+.eye-left { left: 11px; }
+.eye-right { right: 11px; }
+
+.rabbit-blush {
+  position: absolute;
+  top: 22px;
+  width: 8px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ff4081;
+  opacity: .4;
+}
+
+.blush-left { left: 6px; }
+.blush-right { right: 6px; }
+
+.rabbit-nose {
+  position: absolute;
+  top: 21px;
+  left: 50%;
+  translate: -50% 0;
+  width: 4px;
+  height: 3px;
+  border-radius: 40% 40% 50% 50%;
+  background: #e91e63;
+}
+
+.rabbit-torso {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  translate: -50% 0;
+  width: 46px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.mini-mooncake {
+  font-size: 16px;
+  margin-top: 10px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.rabbit-tail {
+  position: absolute;
+  bottom: 8px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.rabbit-hint-badge {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  translate: -50% 0;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffd54f;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  padding: 2px 8px;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  animation: tapPulse 1.8s ease-in-out infinite;
+}
+
+/* 3. CƠN MƯA THIÊN ĐĂNG & ĐÈN ÔNG SAO BAY LÊN TRỜI */
+.lantern-sky-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 4;
+}
+
+.floating-lantern-item {
+  position: absolute;
+  bottom: -90px;
+  animation: lanternFloatUp linear infinite;
+  will-change: transform;
+}
+
+.extra-lantern {
+  animation-iteration-count: 1;
+}
+
+/* Sky Lantern (Đèn trời) */
+.sky-lantern-box {
+  position: relative;
+  border-radius: 6px 6px 12px 12px;
+  background: linear-gradient(180deg, rgba(255, 110, 0, 0.85) 0%, rgba(255, 179, 0, 0.95) 70%, #ffeb3b 100%);
+  box-shadow: 0 0 20px rgba(255, 160, 0, 0.8), inset 0 -6px 12px rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: lanternSwayAnim 3.5s ease-in-out infinite alternate;
+}
+
+.lantern-flame {
+  position: absolute;
+  bottom: 4px;
+  width: 6px;
+  height: 10px;
+  border-radius: 50% 50% 20% 20%;
+  background: #ffffff;
+  box-shadow: 0 0 10px #ffea00, 0 0 20px #ff3d00;
+  animation: flameFlicker 0.25s infinite alternate;
+}
+
+.lantern-text {
+  font-family: "Playfair Display", serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #791600;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Star lantern emoji/prop */
+.star-lantern-shape {
+  display: inline-block;
+  filter: drop-shadow(0 0 16px rgba(255, 193, 7, 0.75));
+  animation: lanternSwayAnim 3s ease-in-out infinite alternate;
+}
+
+@keyframes lanternFloatUp {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  85% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(-118vh);
+    opacity: 0;
+  }
+}
+
+@keyframes lanternSwayAnim {
+  0% { transform: rotate(-8deg) translateX(-12px); }
+  100% { transform: rotate(8deg) translateX(12px); }
+}
+
+@keyframes flameFlicker {
+  0% { opacity: 0.8; transform: scaleY(0.9); }
+  100% { opacity: 1; transform: scaleY(1.15); }
+}
+
+/* 4. ĐOM ĐÓM BAY DẬP DỜN */
+.fireflies-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 3;
+}
+
+.firefly-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: #ffeb3b;
+  box-shadow: 0 0 8px #ffea00, 0 0 18px #ff9800;
+  animation: fireflyDrift ease-in-out infinite alternate;
+}
+
+@keyframes fireflyDrift {
+  0% {
+    opacity: 0.15;
+    transform: translate(0, 0) scale(0.7);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translate(25px, -30px) scale(1.2);
+  }
+  100% {
+    opacity: 0.25;
+    transform: translate(-20px, -55px) scale(0.8);
+  }
+}
+
+/* 5. DẢI THƯ TRĂNG RẰM TINH TẾ (GỌN GÀNG, ĐẶT Ở GÓC DƯỚI) */
+.moon-ribbon-scroll {
+  position: absolute;
+  z-index: 20;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  translate: -50% 0;
+  width: min(92vw, 560px);
+  padding: 22px 24px 20px;
+  border-radius: 26px;
+  text-align: center;
+  background: linear-gradient(145deg, rgba(28, 14, 52, 0.85), rgba(12, 7, 28, 0.92));
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.75),
+              0 0 50px rgba(255, 179, 0, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px);
+  animation: ribbonEnter 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.scroll-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.tag-season {
+  color: #ffd54f;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+}
+
+.btn-toggle-scroll {
+  background: transparent;
+  border: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: .2s ease;
+}
+
+.btn-toggle-scroll:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.couple-heading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0 12px;
+  font-family: "Playfair Display", "Be Vietnam Pro", serif;
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
+  font-weight: 700;
+  color: #fff8e1;
+  text-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
+}
+
+.heading-heart {
+  width: 24px;
+  height: 24px;
+  color: #ff3366;
+  filter: drop-shadow(0 0 10px #ff3366);
+  animation: heartbeat 1.45s ease-in-out infinite;
+}
+
+.main-autumn-wish {
+  margin: 0 auto 16px;
+  color: #ffe082;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: clamp(0.92rem, 2.8vw, 1.05rem);
+  font-weight: 500;
+  line-height: 1.65;
+  min-height: 2.8em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scroll-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-action-lantern, .btn-action-rabbit {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .25s ease;
+}
+
+.btn-action-lantern {
+  background: linear-gradient(135deg, #ff8f00, #ffb300);
+  color: #3e1600;
+  border: 1px solid #ffd54f;
+  box-shadow: 0 4px 15px rgba(255, 143, 0, 0.4);
+}
+
+.btn-action-lantern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 143, 0, 0.6);
+}
+
+.btn-action-rabbit {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+.btn-action-rabbit:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* Nút mở lại khi đã ẩn */
+.btn-reopen-scroll {
+  position: absolute;
+  z-index: 20;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  translate: -50% 0;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: rgba(24, 12, 45, 0.85);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  color: #ffe082;
+  font-weight: 600;
+  font-size: 0.88rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  cursor: pointer;
+  transition: .25s ease;
+  backdrop-filter: blur(12px);
+  animation: fadeUp .5s both;
+}
+
+.btn-reopen-scroll:hover {
+  transform: translate(-50%, -2px);
+  border-color: #ffd54f;
+  background: rgba(45, 20, 85, 0.95);
+}
+
+/* ================= CONTROLS ================= */
+.controls {
+  position: absolute;
+  z-index: 25;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  display: flex;
+  gap: 8px;
+}
+
+.controls button {
+  display: flex;
+  min-width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  border-radius: 999px;
+  color: rgba(255, 240, 200, 0.85);
+  background: rgba(18, 10, 35, 0.7);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: .25s ease;
+}
+
+.controls button:last-child {
+  padding: 0;
+}
+
+.controls button:hover {
+  color: white;
+  border-color: #ffd54f;
+  background: rgba(255, 179, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+/* ================= ANIMATIONS ================= */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: .2; transform: scale(.6); }
+  50% { opacity: .95; transform: scale(1.15); }
+}
+
+@keyframes shootingStarAnim {
+  0% {
+    transform: translate(0, 0) rotate(-35deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-280px, 200px) rotate(-35deg);
+    opacity: 0;
+  }
+}
+
+@keyframes ambientFloat {
+  to { transform: translate(10vw, 6vh) scale(1.1); }
+}
+
+@keyframes auraPulse {
+  50% { opacity: .55; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+@keyframes lanternFloat {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-12px) rotate(1deg); }
+}
+
+@keyframes starLanternSway {
+  0% { transform: rotate(-6deg); }
+  100% { transform: rotate(6deg); }
+}
+
+@keyframes tapPulse {
+  50% { opacity: .65; transform: translateY(3px); }
+}
+
+@keyframes openingFlash {
+  0% { opacity: 0; transform: scale(.7); }
+  28% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes moonBurstAnim {
+  0% { transform: scale(0.2); opacity: 0; }
+  40% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(6); opacity: 0; }
+}
+
+@keyframes ringBurstAnim {
+  from { transform: scale(0.1); opacity: 1; }
+  to { transform: scale(7); opacity: 0; }
+}
+
+@keyframes lanternPop {
+  0% { transform: scale(0) rotate(-20deg); }
+  60% { transform: scale(1.25) rotate(10deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+@keyframes moonlightIn {
+  from { opacity: 0; filter: blur(14px); transform: scale(1.05); }
+  to { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
+@keyframes moonPulse {
+  0% { opacity: 0.6; transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1.04); }
+}
+
+@keyframes cloudDrift {
+  0% { transform: translateX(-15px); }
+  100% { transform: translateX(15px); }
+}
+
+@keyframes earTwitchLeft {
+  0%, 80%, 100% { transform: rotate(-12deg); }
+  85% { transform: rotate(-22deg); }
+  90% { transform: rotate(-8deg); }
+}
+
+@keyframes earTwitchRight {
+  0%, 80%, 100% { transform: rotate(12deg); }
+  85% { transform: rotate(22deg); }
+  90% { transform: rotate(8deg); }
+}
+
+@keyframes rabbitHopAnim {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-28px) scale(1.1); }
+  70% { transform: translateY(-6px) scale(0.95); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes bubblePop {
+  0% { transform: scale(0.3); opacity: 0; }
+  70% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes ribbonEnter {
+  from { opacity: 0; transform: translate(-50%, 40px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  12% { transform: scale(1.18); }
+  25% { transform: scale(1); }
+  36% { transform: scale(1.12); }
+  52% { transform: scale(1); }
+}
+
+@media (max-width: 600px) {
+  .jade-rabbit-container {
+    right: 20px;
+    top: 140px;
+  }
+  .full-moon-container {
+    right: 20px;
+    top: 20px;
+    width: 110px;
+  }
+  .moon-ribbon-scroll {
+    padding: 18px 16px 16px;
+    border-radius: 20px;
+  }
+  .couple-heading {
+    font-size: 1.6rem;
+  }
+  .controls button span {
+    display: none;
+  }
+  .controls button {
+    padding: 0;
+  }
+}
