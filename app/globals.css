@@ -202,7 +202,7 @@ button {
   left: 50%;
   width: 170px;
   height: 170px;
-  translate: -50% -50%;
+  transform: translate(-50%, -50%);
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 179, 0, 0.45), transparent 70%);
   filter: blur(35px);
@@ -269,7 +269,92 @@ button {
   color: #ff3366;
 }
 
-/* ================= PHASE 2: OPENING SCENE ================= */
+/* ====== INTRO SCENE ENHANCEMENTS ====== */
+.intro-bg-moon {
+  position: absolute;
+  top: -12vw;
+  right: -12vw;
+  width: clamp(220px, 55vw, 480px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 230, 120, 0.16) 0%,
+    rgba(255, 175, 0, 0.08) 50%,
+    transparent 72%
+  );
+  filter: blur(55px);
+  pointer-events: none;
+  animation: introBgMoonPulse 6s ease-in-out infinite alternate;
+}
+
+.intro-lanterns-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.intro-lantern {
+  position: absolute;
+  animation:
+    introLanternFloat ease-in-out infinite alternate,
+    introLanternAppear ease forwards;
+  filter: drop-shadow(0 0 16px rgba(255, 145, 0, 0.65));
+  opacity: 0;
+}
+
+.il-1 { font-size: 40px; top: 11%; left:  6%; animation-duration: 5.5s, 1.3s; animation-delay: 0.3s, 0.3s; }
+.il-2 { font-size: 30px; top: 28%; right: 9%; animation-duration: 6.2s, 1.3s; animation-delay: 0.9s, 0.9s; }
+.il-3 { font-size: 35px; top: 62%; left: 10%; animation-duration: 4.9s, 1.3s; animation-delay: 1.4s, 1.4s; }
+.il-4 { font-size: 27px; top: 74%; right: 7%; animation-duration: 5.4s, 1.3s; animation-delay: 1.9s, 1.9s; }
+
+.intro-particles-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.intro-particle {
+  position: absolute;
+  bottom: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 248, 145, 0.95) 0%,
+    rgba(255, 162, 30, 0.6) 55%,
+    transparent 75%
+  );
+  box-shadow: 0 0 7px rgba(255, 205, 55, 0.75), 0 0 18px rgba(255, 135, 0, 0.4);
+  animation: introParticleFloat linear infinite;
+  opacity: 0;
+}
+
+/* Shimmer sweep on intro title */
+.intro-title {
+  position: relative;
+  isolation: isolate;
+}
+
+.intro-title::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 25%,
+    rgba(255, 255, 220, 0.22) 47%,
+    rgba(255, 255, 255, 0.32) 50%,
+    rgba(255, 255, 220, 0.22) 53%,
+    transparent 75%
+  );
+  background-size: 300% 100%;
+  animation: titleShimmerSweep 5s ease-in-out infinite 2s;
+  pointer-events: none;
+}
+
+
 .opening-scene {
   display: grid;
   place-items: center;
@@ -461,7 +546,7 @@ button {
   position: absolute;
   bottom: 0;
   left: 50%;
-  translate: -50% 0;
+  transform: translateX(-50%);
   width: 90px;
   height: 32px;
 }
@@ -490,7 +575,7 @@ button {
   position: absolute;
   top: 14px;
   left: 50%;
-  translate: -50% 0;
+  transform: translateX(-50%);
   width: 44px;
   height: 38px;
   border-radius: 50%;
@@ -559,7 +644,7 @@ button {
   position: absolute;
   top: 21px;
   left: 50%;
-  translate: -50% 0;
+  transform: translateX(-50%);
   width: 4px;
   height: 3px;
   border-radius: 40% 40% 50% 50%;
@@ -570,7 +655,7 @@ button {
   position: absolute;
   bottom: 5px;
   left: 50%;
-  translate: -50% 0;
+  transform: translateX(-50%);
   width: 46px;
   height: 36px;
   border-radius: 50%;
@@ -602,7 +687,7 @@ button {
   position: absolute;
   bottom: -22px;
   left: 50%;
-  translate: -50% 0;
+  transform: translateX(-50%);
   white-space: nowrap;
   font-size: 0.72rem;
   font-weight: 700;
@@ -613,6 +698,48 @@ button {
   border-radius: 999px;
   backdrop-filter: blur(6px);
   animation: tapPulse 1.8s ease-in-out infinite;
+}
+
+/* Jade rabbit entrance animation (plays when first mounting after orbit) */
+.jade-rabbit-container {
+  animation: rabbitEntrance 0.7s cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+}
+
+/* ====== ORBIT FLYING RABBIT — Tỏ Bay Vòng Tròn To Nhỏ Xa Gần ====== */
+.orbit-center {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  overflow: visible;
+}
+
+/*
+  DESIGN: Pivot element placed at screen center.
+  Rotates clockwise 540° (1.5 circles) over 3.1s.
+  Bunny at the end of the arm counter-rotates to stay upright,
+  AND scales to simulate near/far perspective:
+    - Bottom of orbit (90° from start) = nearest → scale 1.48, full opacity
+    - Top of orbit (270° from start)   = farthest → scale 0.58, slightly dim
+*/
+.orbit-pivot-ring {
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  animation: pivotSpin 3.1s cubic-bezier(0.38, 0.1, 0.22, 0.95) forwards;
+}
+
+.orbit-bunny {
+  position: absolute;
+  /* Distance from center = orbit radius */
+  left: clamp(105px, 19vw, 185px);
+  top: 0;
+  font-size: clamp(50px, 8.5vw, 68px);
+  /* Trail glow: brighter at bottom (near), softer at top (far) */
+  animation: bunnyOrbitSpin 3.1s cubic-bezier(0.38, 0.1, 0.22, 0.95) forwards;
+  will-change: transform, opacity, filter;
 }
 
 /* 3. CƠN MƯA THIÊN ĐĂNG & ĐÈN ÔNG SAO BAY LÊN TRỜI */
@@ -739,15 +866,15 @@ button {
   z-index: 20;
   left: 50%;
   bottom: max(24px, env(safe-area-inset-bottom));
-  translate: -50% 0;
+  transform: translateX(-50%);
   width: min(92vw, 560px);
   padding: 22px 24px 20px;
   border-radius: 26px;
   text-align: center;
-  background: linear-gradient(145deg, rgba(28, 14, 52, 0.85), rgba(12, 7, 28, 0.92));
-  border: 1px solid rgba(255, 215, 0, 0.35);
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.75),
-              0 0 50px rgba(255, 179, 0, 0.18),
+  background: linear-gradient(145deg, rgba(28, 14, 52, 0.88), rgba(12, 7, 28, 0.94));
+  border: 1px solid rgba(255, 215, 0, 0.38);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.78),
+              0 0 50px rgba(255, 179, 0, 0.22),
               inset 0 1px 0 rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(20px);
   animation: ribbonEnter 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -771,12 +898,13 @@ button {
 .btn-toggle-scroll {
   background: transparent;
   border: 0;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 14px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 16px;
   cursor: pointer;
-  padding: 2px 6px;
+  padding: 4px 8px;
   border-radius: 6px;
   transition: .2s ease;
+  touch-action: manipulation;
 }
 
 .btn-toggle-scroll:hover {
@@ -829,12 +957,14 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 8px 18px;
+  padding: 9px 18px;
   border-radius: 999px;
   font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
   transition: .25s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-action-lantern {
@@ -867,11 +997,11 @@ button {
   z-index: 20;
   left: 50%;
   bottom: max(24px, env(safe-area-inset-bottom));
-  translate: -50% 0;
-  padding: 10px 22px;
+  transform: translateX(-50%);
+  padding: 11px 24px;
   border-radius: 999px;
-  background: rgba(24, 12, 45, 0.85);
-  border: 1px solid rgba(255, 215, 0, 0.4);
+  background: rgba(24, 12, 45, 0.88);
+  border: 1px solid rgba(255, 215, 0, 0.45);
   color: #ffe082;
   font-weight: 600;
   font-size: 0.88rem;
@@ -880,6 +1010,8 @@ button {
   transition: .25s ease;
   backdrop-filter: blur(12px);
   animation: fadeUp .5s both;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-reopen-scroll:hover {
@@ -913,6 +1045,8 @@ button {
   backdrop-filter: blur(12px);
   cursor: pointer;
   transition: .25s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .controls button:last-child {
@@ -927,6 +1061,156 @@ button {
 }
 
 /* ================= ANIMATIONS ================= */
+
+/* Intro enhancements */
+@keyframes introBgMoonPulse {
+  from { opacity: 0.5; transform: scale(1); }
+  to   { opacity: 1;   transform: scale(1.08); }
+}
+
+@keyframes introLanternFloat {
+  from { transform: translateY(0) rotate(-6deg); }
+  to   { transform: translateY(-15px) rotate(6deg); }
+}
+
+@keyframes introLanternAppear {
+  from { opacity: 0; transform: translateY(20px) scale(0.75); }
+  to   { opacity: 0.35; transform: translateY(0) scale(1); }
+}
+
+@keyframes introParticleFloat {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.5);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.92;
+    transform: translateY(-6vh) translateX(7px) scale(1);
+  }
+  42% {
+    opacity: 0.68;
+    transform: translateY(-40vh) translateX(-13px) scale(0.88);
+  }
+  75% {
+    opacity: 0.28;
+    transform: translateY(-72vh) translateX(17px) scale(0.62);
+  }
+  100% {
+    transform: translateY(-108vh) translateX(-6px) scale(0.2);
+    opacity: 0;
+  }
+}
+
+@keyframes titleShimmerSweep {
+  0%    { background-position: 200% 0; }
+  38%   { background-position: -50% 0; }
+  100%  { background-position: -50% 0; }
+}
+
+/* Jade rabbit entrance when appearing after orbit */
+@keyframes rabbitEntrance {
+  from {
+    opacity: 0;
+    transform: scale(0.2) translateY(-25px);
+    filter: blur(6px);
+  }
+  65% {
+    transform: scale(1.12) translateY(-5px);
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* ===== ORBIT KEYFRAMES: PIVOT + BUNNY WITH 3D NEAR/FAR SCALE ===== */
+/*
+  Pivot rotates 540deg (1.5 circles, clockwise).
+  Bunny counter-rotates -540deg to stay upright,
+  PLUS scale oscillates based on position in orbit:
+    Orbit timeline (% of 3.1s animation):
+      6%  → 0° start (right), appear, scale 1.0
+     21%  → 90° (bottom — NEAREST), scale 1.48, full glow
+     37%  → 180° (left), scale 1.0
+     53%  → 270° (top — FARTHEST), scale 0.58, dim
+     69%  → 360° (right, 1 full circle), scale 1.0
+     84%  → 450° (bottom again — NEAREST), scale 1.42
+     91%  → 540° complete, scale 0.95
+    100%  → fade out
+*/
+@keyframes pivotSpin {
+  0%   { transform: rotate(0deg);   opacity: 0; }
+  6%   { transform: rotate(0deg);   opacity: 1; }
+  91%  { transform: rotate(540deg); opacity: 1; }
+  100% { transform: rotate(570deg); opacity: 0; }
+}
+
+@keyframes bunnyOrbitSpin {
+  /* Appear at right side */
+  0%   {
+    transform: translateY(-50%) rotate(0deg) scale(0.15);
+    opacity: 0;
+    filter: drop-shadow(0 0 8px rgba(255,220,80,0.5));
+  }
+  6%   {
+    transform: translateY(-50%) rotate(0deg) scale(1.05);
+    opacity: 1;
+    filter: drop-shadow(0 0 18px rgba(255,215,60,0.9))
+            drop-shadow(0 0 36px rgba(255,140,0,0.6));
+  }
+  /* 90° — bottom, NEAREST → biggest + brightest */
+  21%  {
+    transform: translateY(-50%) rotate(-90deg) scale(1.48);
+    opacity: 1;
+    filter: drop-shadow(0 0 28px rgba(255,230,60,1))
+            drop-shadow(0 0 55px rgba(255,150,0,0.85))
+            drop-shadow(0 0 90px rgba(255,80,0,0.55));
+  }
+  /* 180° — left, medium */
+  37%  {
+    transform: translateY(-50%) rotate(-180deg) scale(1.05);
+    opacity: 1;
+    filter: drop-shadow(0 0 18px rgba(255,215,60,0.85))
+            drop-shadow(0 0 36px rgba(255,140,0,0.5));
+  }
+  /* 270° — top, FARTHEST → smallest + dimmest */
+  53%  {
+    transform: translateY(-50%) rotate(-270deg) scale(0.58);
+    opacity: 0.72;
+    filter: drop-shadow(0 0 8px rgba(255,200,50,0.55))
+            drop-shadow(0 0 16px rgba(255,120,0,0.3));
+  }
+  /* 360° — right again, medium */
+  69%  {
+    transform: translateY(-50%) rotate(-360deg) scale(1.05);
+    opacity: 1;
+    filter: drop-shadow(0 0 18px rgba(255,215,60,0.85))
+            drop-shadow(0 0 36px rgba(255,140,0,0.5));
+  }
+  /* 450° — bottom again, NEAREST */
+  84%  {
+    transform: translateY(-50%) rotate(-450deg) scale(1.42);
+    opacity: 1;
+    filter: drop-shadow(0 0 26px rgba(255,230,60,1))
+            drop-shadow(0 0 50px rgba(255,150,0,0.8))
+            drop-shadow(0 0 80px rgba(255,80,0,0.5));
+  }
+  /* 540° — 1.5 circles done */
+  91%  {
+    transform: translateY(-50%) rotate(-540deg) scale(0.95);
+    opacity: 1;
+    filter: drop-shadow(0 0 18px rgba(255,215,60,0.9));
+  }
+  /* Shrink and disappear — banner will pop in */
+  100% {
+    transform: translateY(-50%) rotate(-570deg) scale(0.06);
+    opacity: 0;
+    filter: drop-shadow(0 0 6px rgba(255,215,60,0.4));
+  }
+}
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
@@ -1040,7 +1324,7 @@ button {
 }
 
 @keyframes ribbonEnter {
-  from { opacity: 0; transform: translate(-50%, 40px); }
+  from { opacity: 0; transform: translate(-50%, 35px); }
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
@@ -1052,27 +1336,192 @@ button {
   52% { transform: scale(1); }
 }
 
-@media (max-width: 600px) {
-  .jade-rabbit-container {
-    right: 20px;
-    top: 140px;
+/* ================= MOBILE & RESPONSIVE DESIGN ================= */
+@media (max-width: 640px) {
+  .intro-scene {
+    padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
   }
+
+  .intro-title {
+    font-size: clamp(1.8rem, 7vw, 2.75rem);
+  }
+
+  .intro-copy {
+    font-size: clamp(0.88rem, 3.5vw, 1.02rem);
+    margin: 12px 0 14px;
+    padding: 0 8px;
+  }
+
+  .lantern-prop {
+    width: 120px;
+    height: 140px;
+  }
+
+  .prop-star-lantern {
+    font-size: 60px;
+  }
+
+  .starter-aura {
+    width: 140px;
+    height: 140px;
+  }
+
+  /* Moonlight Scene Layout on Smartphones */
   .full-moon-container {
-    right: 20px;
-    top: 20px;
-    width: 110px;
+    top: max(14px, env(safe-area-inset-top));
+    right: max(14px, env(safe-area-inset-right));
+    left: auto;
+    width: clamp(82px, 23vw, 105px);
+    height: clamp(82px, 23vw, 105px);
   }
+
+  .jade-rabbit-container {
+    top: max(16px, env(safe-area-inset-top));
+    left: max(14px, env(safe-area-inset-left));
+    right: auto;
+    width: 86px;
+    height: 102px;
+  }
+
+  .rabbit-speech-bubble {
+    top: -4px;
+    bottom: auto;
+    left: 88px;
+    right: auto;
+    transform: none;
+    max-width: min(200px, 53vw);
+    padding: 7px 11px;
+    font-size: 0.76rem;
+    border-radius: 14px;
+  }
+
+  .rabbit-speech-bubble::after {
+    top: 16px;
+    bottom: auto;
+    left: -12px;
+    right: auto;
+    border: 6px solid transparent !important;
+    border-right-color: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  .rabbit-hint-badge {
+    bottom: -18px;
+    font-size: 0.65rem;
+    padding: 1px 7px;
+  }
+
+  /* Floating Ribbon Card centered nicely above bottom control bar */
   .moon-ribbon-scroll {
-    padding: 18px 16px 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100vw - 28px);
+    max-width: 440px;
+    bottom: max(68px, calc(env(safe-area-inset-bottom) + 58px));
+    padding: 15px 14px 13px;
     border-radius: 20px;
   }
+
+  .tag-season {
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+  }
+
   .couple-heading {
-    font-size: 1.6rem;
+    font-size: clamp(1.45rem, 5vw, 1.85rem);
+    margin: 4px 0 8px;
+    gap: 8px;
   }
-  .controls button span {
-    display: none;
+
+  .heading-heart {
+    width: 20px;
+    height: 20px;
   }
+
+  .main-autumn-wish {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    min-height: 2.6em;
+    margin-bottom: 12px;
+    padding: 0 4px;
+  }
+
+  .scroll-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .btn-action-lantern, .btn-action-rabbit {
+    width: 100%;
+    justify-content: center;
+    padding: 9px 6px;
+    font-size: 0.78rem;
+    border-radius: 999px;
+  }
+
+  /* Reopen button on Mobile */
+  .btn-reopen-scroll {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: max(68px, calc(env(safe-area-inset-bottom) + 58px));
+    width: calc(100vw - 32px);
+    max-width: 320px;
+    padding: 10px 16px;
+    font-size: 0.82rem;
+    text-align: center;
+  }
+
+  /* Controls fixed at bottom corner */
+  .controls {
+    right: max(14px, env(safe-area-inset-right));
+    bottom: max(12px, env(safe-area-inset-bottom));
+    gap: 6px;
+  }
+
   .controls button {
-    padding: 0;
+    height: 38px;
+    min-width: 38px;
+    padding: 0 12px;
+    font-size: 0.78rem;
+  }
+
+  .controls button span {
+    font-size: 0.76rem;
   }
 }
+
+/* Extra small screens / short screens */
+@media (max-height: 660px) {
+  .intro-title {
+    font-size: 1.6rem;
+  }
+
+  .lantern-prop {
+    transform: scale(0.85);
+  }
+
+  .moon-ribbon-scroll {
+    padding: 12px 14px 10px;
+  }
+
+  .main-autumn-wish {
+    margin-bottom: 8px;
+    font-size: 0.82rem;
+    min-height: 2.2em;
+  }
+
+  .couple-heading {
+    margin: 2px 0 4px;
+    font-size: 1.35rem;
+  }
+}
+
+/* Active touch feedback on smartphones */
+@media (hover: none) and (pointer: coarse) {
+  button:active, .full-moon-container:active, .jade-rabbit-container:active {
+    transform: scale(0.95) !important;
+    opacity: 0.9;
+  }
+}
+

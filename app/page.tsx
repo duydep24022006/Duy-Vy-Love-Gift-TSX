@@ -118,8 +118,11 @@ export default function Home() {
   const [extraLanterns, setExtraLanterns] = useState<CustomLantern[]>([]);
   const [activeWishIndex, setActiveWishIndex] = useState(0);
   const [showScrollNote, setShowScrollNote] = useState(true);
+  const [isRabbitFlying, setIsRabbitFlying] = useState(false);
+  const [showBannerCard, setShowBannerCard] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Background stars
   const stars = useMemo(
@@ -178,21 +181,51 @@ export default function Home() {
     []
   );
 
+  // Intro rising sparkle particles
+  const introParticles = useMemo(
+    () =>
+      Array.from({ length: 24 }, (_, i) => ({
+        id: i,
+        left: 4 + seeded(i, 91) * 92,
+        size: 3 + seeded(i, 92) * 8,
+        delay: seeded(i, 93) * 7,
+        duration: 5 + seeded(i, 94) * 5,
+      })),
+    []
+  );
+
   useEffect(() => () => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    if (flyTimerRef.current) clearTimeout(flyTimerRef.current);
   }, []);
 
   const openCelebration = useCallback(() => {
     if (phase !== "intro") return;
     setPhase("opening");
     if (soundOn) playMidAutumnSound("open");
-    timerRef.current = setTimeout(() => setPhase("moonlight"), 1300);
+    timerRef.current = setTimeout(() => {
+      setPhase("moonlight");
+      setIsRabbitFlying(true);
+      setShowBannerCard(false);
+      // Thỏ bay 1.5 vòng ~3s → hiện banner
+      flyTimerRef.current = setTimeout(() => {
+        setIsRabbitFlying(false);
+        setTimeout(() => {
+          setShowBannerCard(true);
+          if (soundOn) playMidAutumnSound("lantern");
+        }, 260);
+      }, 3100);
+    }, 1300);
   }, [phase, soundOn]);
 
   const replay = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    if (flyTimerRef.current) clearTimeout(flyTimerRef.current);
     setPhase("intro");
     setExtraLanterns([]);
+    setIsRabbitFlying(false);
+    setShowBannerCard(false);
+    setShowScrollNote(true);
   };
 
   // Click on Rabbit interaction
@@ -264,6 +297,31 @@ export default function Home() {
         className={`intro-scene ${phase === "intro" ? "is-visible" : ""}`}
         aria-hidden={phase !== "intro"}
       >
+        {/* Hào quang mặt trăng hậu cảnh */}
+        <div className="intro-bg-moon" aria-hidden="true" />
+        {/* Đèn lồng trang trí nền */}
+        <div className="intro-lanterns-bg" aria-hidden="true">
+          <span className="intro-lantern il-1">🏮</span>
+          <span className="intro-lantern il-2">🏮</span>
+          <span className="intro-lantern il-3">🏮</span>
+          <span className="intro-lantern il-4">🥮</span>
+        </div>
+        {/* Hạt sáng vàng bay lên */}
+        <div className="intro-particles-field" aria-hidden="true">
+          {introParticles.map((p) => (
+            <span
+              key={p.id}
+              className="intro-particle"
+              style={{
+                left: `${p.left}%`,
+                width: p.size,
+                height: p.size,
+                animationDelay: `${p.delay}s`,
+                animationDuration: `${p.duration}s`,
+              }}
+            />
+          ))}
+        </div>
         <p className="autumn-eyebrow">
           <Sparkles size={16} /> Đêm Rằm Tháng 8 · Trung Thu Yêu Thương
         </p>
@@ -334,44 +392,55 @@ export default function Home() {
           <div className="moon-cloud cloud-bottom" />
         </div>
 
+        {/* Thỏ Ngọc bay vòng tròn — to nhỏ xa gần 3D */}
+        {isRabbitFlying && (
+          <div className="orbit-center" aria-hidden="true">
+            <div className="orbit-pivot-ring">
+              <span className="orbit-bunny">🐰</span>
+            </div>
+          </div>
+        )}
+
         {/* 2. CHÚ THỎ NGỌC TINH NGHỊCH (NGỒI TRÊN MÂY) */}
-        <div
-          className={`jade-rabbit-container ${rabbitHopCount > 0 ? "is-hopping" : ""}`}
-          key={rabbitHopCount}
-          onClick={interactRabbit}
-          title="Chạm vào Thỏ Ngọc để trêu nhé!"
-        >
-          <div className="rabbit-speech-bubble">
-            <span>{rabbitMessage}</span>
-          </div>
+        {!isRabbitFlying && (
+          <div
+            className={`jade-rabbit-container ${rabbitHopCount > 0 ? "is-hopping" : ""}`}
+            key={rabbitHopCount}
+            onClick={interactRabbit}
+            title="Chạm vào Thỏ Ngọc để trêu nhé!"
+          >
+            <div className="rabbit-speech-bubble">
+              <span>{rabbitMessage}</span>
+            </div>
 
-          <div className="rabbit-cloud-stand">
-            <div className="cloud-bubble cb-1" />
-            <div className="cloud-bubble cb-2" />
-            <div className="cloud-bubble cb-3" />
-          </div>
+            <div className="rabbit-cloud-stand">
+              <div className="cloud-bubble cb-1" />
+              <div className="cloud-bubble cb-2" />
+              <div className="cloud-bubble cb-3" />
+            </div>
 
-          <div className="rabbit-body">
-            <div className="rabbit-ear ear-left">
-              <span className="ear-inner" />
+            <div className="rabbit-body">
+              <div className="rabbit-ear ear-left">
+                <span className="ear-inner" />
+              </div>
+              <div className="rabbit-ear ear-right">
+                <span className="ear-inner" />
+              </div>
+              <div className="rabbit-head">
+                <span className="rabbit-eye eye-left" />
+                <span className="rabbit-eye eye-right" />
+                <span className="rabbit-blush blush-left" />
+                <span className="rabbit-blush blush-right" />
+                <span className="rabbit-nose" />
+              </div>
+              <div className="rabbit-torso">
+                <span className="mini-mooncake">🥮</span>
+              </div>
+              <div className="rabbit-tail" />
             </div>
-            <div className="rabbit-ear ear-right">
-              <span className="ear-inner" />
-            </div>
-            <div className="rabbit-head">
-              <span className="rabbit-eye eye-left" />
-              <span className="rabbit-eye eye-right" />
-              <span className="rabbit-blush blush-left" />
-              <span className="rabbit-blush blush-right" />
-              <span className="rabbit-nose" />
-            </div>
-            <div className="rabbit-torso">
-              <span className="mini-mooncake">🥮</span>
-            </div>
-            <div className="rabbit-tail" />
+            <span className="rabbit-hint-badge">Chạm vào em nè 🐰</span>
           </div>
-          <span className="rabbit-hint-badge">Chạm vào em nè 🐰</span>
-        </div>
+        )}
 
         {/* 3. CƠN MƯA THIÊN ĐĂNG & ĐÈN ÔNG SAO BAY LÊN */}
         <div className="lantern-sky-field" aria-hidden="true">
@@ -434,8 +503,8 @@ export default function Home() {
           ))}
         </div>
 
-        {/* 5. DẢI THƯ TRĂNG RẰM TINH TẾ (GỌN GÀNG, KHÔNG ÁN NGỮ GIỮA MÀN HÌNH) */}
-        {showScrollNote ? (
+        {/* 5. DẢI THƯ TRĂNG RẰM — hiện sau khi Thỏ Ngọc bay xong */}
+        {showBannerCard && showScrollNote ? (
           <div className="moon-ribbon-scroll">
             <div className="scroll-header">
               <span className="tag-season">TẾT TRUNG THU · ĐÊM RẰM ĐOÀN VIÊN</span>
@@ -474,14 +543,14 @@ export default function Home() {
               </button>
             </div>
           </div>
-        ) : (
+        ) : showBannerCard ? (
           <button
             className="btn-reopen-scroll"
             onClick={() => setShowScrollNote(true)}
           >
             📜 Xem thiệp chúc Trung Thu của Duy
           </button>
-        )}
+        ) : null}
 
         {/* Nút điều khiển góc phải */}
         <div className="controls">
