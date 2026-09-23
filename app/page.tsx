@@ -49,78 +49,142 @@ function seeded(index: number, salt: number) {
   return Math.round((value - Math.floor(value)) * 100000) / 100000;
 }
 
-// Pentatonic Asian chime melody for Mid-Autumn
+// Shared singleton AudioContext to prevent hitting iOS AudioContext limits and handle mobile auto-resume
+let sharedAudioCtx: AudioContext | null = null;
+
+function getAudioContext(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  const AudioContextClass =
+    window.AudioContext ||
+    (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioContextClass) return null;
+
+  if (!sharedAudioCtx || sharedAudioCtx.state === "closed") {
+    sharedAudioCtx = new AudioContextClass();
+  }
+  if (sharedAudioCtx.state === "suspended") {
+    sharedAudioCtx.resume().catch(() => {});
+  }
+  return sharedAudioCtx;
+}
+
+// Pentatonic Asian chime melody for Mid-Autumn (Mobile-optimized with touch resume & node cleanup)
 function playMidAutumnSound(variant: "open" | "hop" | "lantern" | "kiss" = "open") {
   try {
-    const AudioContextClass =
-      window.AudioContext ||
-      (window as typeof window & { webkitAudioContext?: typeof AudioContext })
-        .webkitAudioContext;
-    if (!AudioContextClass) return;
-    const ctx = new AudioContextClass();
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    if (ctx.state === "suspended") {
+      ctx.resume().catch(() => {});
+    }
+
+    const now = ctx.currentTime;
     const gain = ctx.createGain();
+    gain.connect(ctx.destination);
 
     if (variant === "hop") {
-      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
-      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.25, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+
       const osc = ctx.createOscillator();
       osc.type = "sine";
-      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.18); // A5
+      osc.frequency.setValueAtTime(587.33, now); // D5
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.18); // A5
       osc.connect(gain);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.35);
+      osc.start(now);
+      osc.stop(now + 0.35);
+
+      setTimeout(() => {
+        try {
+          osc.disconnect();
+          gain.disconnect();
+        } catch {}
+      }, 400);
       return;
     }
 
     if (variant === "lantern") {
-      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.9);
-      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.22, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+
       [659.25, 987.77].forEach((freq, i) => {
         const osc = ctx.createOscillator();
         osc.type = "sine";
         osc.frequency.value = freq;
         osc.connect(gain);
-        osc.start(ctx.currentTime + i * 0.08);
-        osc.stop(ctx.currentTime + 0.85);
+        osc.start(now + i * 0.08);
+        osc.stop(now + 0.85);
+
+        setTimeout(() => {
+          try {
+            osc.disconnect();
+          } catch {}
+        }, 950);
       });
+
+      setTimeout(() => {
+        try {
+          gain.disconnect();
+        } catch {}
+      }, 1000);
       return;
     }
 
     if (variant === "kiss") {
       // Nốt nhạc lãng mạn — E major arpeggio thượng thăng
-      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.11, ctx.currentTime + 0.06);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.8);
-      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.24, now + 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+
       [659.25, 783.99, 987.77, 1174.66, 1318.51].forEach((freq, i) => {
         const osc = ctx.createOscillator();
         osc.type = "sine";
         osc.frequency.value = freq;
         osc.connect(gain);
-        osc.start(ctx.currentTime + i * 0.15);
-        osc.stop(ctx.currentTime + 1.7);
+        osc.start(now + i * 0.15);
+        osc.stop(now + 1.7);
+
+        setTimeout(() => {
+          try {
+            osc.disconnect();
+          } catch {}
+        }, 1800);
       });
+
+      setTimeout(() => {
+        try {
+          gain.disconnect();
+        } catch {}
+      }, 1900);
       return;
     }
 
     // Default opening chime: G4, A4, C5, D5, E5, G5 (Pentatonic melody)
-    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime + 0.04);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 2.8);
-    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.28, now + 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.8);
+
     [392.0, 440.0, 523.25, 587.33, 659.25, 783.99].forEach((freq, index) => {
       const osc = ctx.createOscillator();
       osc.type = "sine";
       osc.frequency.value = freq;
       osc.connect(gain);
-      osc.start(ctx.currentTime + index * 0.14);
-      osc.stop(ctx.currentTime + 2.6);
+      osc.start(now + index * 0.14);
+      osc.stop(now + 2.6);
+
+      setTimeout(() => {
+        try {
+          osc.disconnect();
+        } catch {}
+      }, 2700);
     });
+
+    setTimeout(() => {
+      try {
+        gain.disconnect();
+      } catch {}
+    }, 2900);
   } catch {
     /* Audio fallback */
   }
@@ -128,7 +192,6 @@ function playMidAutumnSound(variant: "open" | "hop" | "lantern" | "kiss" = "open
 
 // Continuous Pentatonic Asian Music Engine (Fallback / Ambient Synthesizer BGM)
 class AmbientBgmEngine {
-  private ctx: AudioContext | null = null;
   private gainNode: GainNode | null = null;
   private isPlaying = false;
   private timer: number | null = null;
@@ -136,44 +199,49 @@ class AmbientBgmEngine {
   start() {
     if (this.isPlaying) return;
     try {
-      const AudioContextClass =
-        window.AudioContext ||
-        (window as typeof window & { webkitAudioContext?: typeof AudioContext })
-          .webkitAudioContext;
-      if (!AudioContextClass) return;
-      this.ctx = new AudioContextClass();
-      if (this.ctx.state === "suspended") {
-        this.ctx.resume();
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      if (ctx.state === "suspended") {
+        ctx.resume().catch(() => {});
       }
-      this.gainNode = this.ctx.createGain();
-      this.gainNode.gain.setValueAtTime(0.001, this.ctx.currentTime);
-      this.gainNode.gain.exponentialRampToValueAtTime(0.05, this.ctx.currentTime + 1.2);
-      this.gainNode.connect(this.ctx.destination);
+      this.gainNode = ctx.createGain();
+      this.gainNode.gain.setValueAtTime(0.001, ctx.currentTime);
+      this.gainNode.gain.exponentialRampToValueAtTime(0.05, ctx.currentTime + 1.2);
+      this.gainNode.connect(ctx.destination);
       this.isPlaying = true;
 
       const scale = [392.0, 440.0, 493.88, 587.33, 659.25, 783.99, 880.0, 987.77, 1174.66];
       let step = 0;
 
       const tick = () => {
-        if (!this.isPlaying || !this.ctx || !this.gainNode) return;
+        if (!this.isPlaying || !this.gainNode) return;
+        const currentCtx = getAudioContext();
+        if (!currentCtx) return;
         const freq = scale[step % scale.length];
         step = (step + (Math.random() > 0.4 ? 1 : 2)) % scale.length;
 
-        const osc = this.ctx.createOscillator();
-        const noteGain = this.ctx.createGain();
+        const osc = currentCtx.createOscillator();
+        const noteGain = currentCtx.createGain();
 
         osc.type = "sine";
-        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        osc.frequency.setValueAtTime(freq, currentCtx.currentTime);
 
-        noteGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
-        noteGain.gain.exponentialRampToValueAtTime(0.04 + Math.random() * 0.03, this.ctx.currentTime + 0.12);
-        noteGain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 2.2);
+        noteGain.gain.setValueAtTime(0.0001, currentCtx.currentTime);
+        noteGain.gain.exponentialRampToValueAtTime(0.04 + Math.random() * 0.03, currentCtx.currentTime + 0.12);
+        noteGain.gain.exponentialRampToValueAtTime(0.0001, currentCtx.currentTime + 2.2);
 
         osc.connect(noteGain);
         noteGain.connect(this.gainNode);
 
-        osc.start(this.ctx.currentTime);
-        osc.stop(this.ctx.currentTime + 2.3);
+        osc.start(currentCtx.currentTime);
+        osc.stop(currentCtx.currentTime + 2.3);
+
+        setTimeout(() => {
+          try {
+            osc.disconnect();
+            noteGain.disconnect();
+          } catch {}
+        }, 2400);
 
         const delay = 480 + Math.random() * 520;
         this.timer = window.setTimeout(tick, delay);
@@ -191,14 +259,21 @@ class AmbientBgmEngine {
       clearTimeout(this.timer);
       this.timer = null;
     }
-    if (this.gainNode && this.ctx) {
+    if (this.gainNode) {
       try {
-        this.gainNode.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.4);
+        const ctx = getAudioContext();
+        if (ctx) {
+          this.gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
+        }
         setTimeout(() => {
-          this.ctx?.close();
-          this.ctx = null;
-        }, 450);
-      } catch {}
+          try {
+            this.gainNode?.disconnect();
+            this.gainNode = null;
+          } catch {}
+        }, 350);
+      } catch {
+        this.gainNode = null;
+      }
     }
   }
 }
@@ -759,6 +834,26 @@ export default function Home() {
       })),
     []
   );
+
+  // Mở khóa âm thanh Web Audio tự động trên điện thoại ngay từ cú chạm / click đầu tiên
+  useEffect(() => {
+    const unlockAudio = () => {
+      const ctx = getAudioContext();
+      if (ctx && ctx.state === "suspended") {
+        ctx.resume().catch(() => {});
+      }
+    };
+    window.addEventListener("touchstart", unlockAudio, { passive: true });
+    window.addEventListener("touchend", unlockAudio, { passive: true });
+    window.addEventListener("pointerdown", unlockAudio, { passive: true });
+    window.addEventListener("click", unlockAudio, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", unlockAudio);
+      window.removeEventListener("touchend", unlockAudio);
+      window.removeEventListener("pointerdown", unlockAudio);
+      window.removeEventListener("click", unlockAudio);
+    };
+  }, []);
 
   useEffect(() => {
     if (soundOn && phase !== "intro") {

@@ -7,6 +7,9 @@
   --gold: #ffd166;
   --amber: #ff9f1c;
   --moon-glow: rgba(255, 223, 133, 0.4);
+  /* Chiều dài dây treo banner: tính động theo chiều cao màn hình để đầu dây luôn cách mép trên ~60px */
+  --banner-rope-length: clamp(340px, calc(100dvh - 355px), 640px);
+  --banner-rope-offset: calc(-1 * var(--banner-rope-length));
 }
 
 * {
@@ -1270,11 +1273,11 @@ button {
 /* 5. DẢI THƯ TRĂNG RẰM TINH TẾ (RƠI TỪ TRÊN XUỐNG GIỮA MÀN HÌNH, SỢI DÂY TREO & ĐUNG ĐƯA LŨNG LẲNG) */
 .banner-hanging-string {
   position: absolute;
-  top: -180px;
+  top: var(--banner-rope-offset);
   left: 50%;
   transform: translateX(-50%);
   width: 3px;
-  height: 180px;
+  height: var(--banner-rope-length);
   background: linear-gradient(to bottom, rgba(255, 215, 0, 0.95), rgba(255, 105, 180, 0.9));
   box-shadow: 0 0 12px rgba(255, 215, 0, 0.85);
   pointer-events: none;
@@ -1309,11 +1312,11 @@ button {
   top: auto;
   bottom: max(78px, calc(env(safe-area-inset-bottom) + 66px));
   transform: translateX(-50%);
-  /* top center = trục lắc ở đỉnh banner, giống lồng đèn thật treo dây */
-  transform-origin: top center;
+  /* Trục lắc đặt đúng tại điểm khoen tròn đỉnh dây trên bầu trời */
+  transform-origin: 50% var(--banner-rope-offset);
   animation:
     bannerDropMobile 1.1s cubic-bezier(0.175, 0.885, 0.32, 1.22) forwards,
-    bannerDangleMobile 5s 1.2s ease-in-out infinite alternate;
+    bannerDangleMobile 5.4s 1.2s ease-in-out infinite alternate;
   will-change: transform, opacity;
 }
 
@@ -1336,17 +1339,22 @@ button {
   }
 }
 
-/* Đung đưa nhẹ nhàng như lồng đèn treo dây (pivot ở trên, đáy lắc qua lại) */
+/* Đung đưa nhẹ nhàng như lồng đèn treo dây (pivot cố định ở khoen tròn trên cao) */
 @keyframes bannerDangleMobile {
   0%   { transform: translateX(-50%) rotate(0deg); }
-  20%  { transform: translateX(-50%) rotate(3.5deg); }
-  50%  { transform: translateX(-50%) rotate(-3.5deg); }
-  80%  { transform: translateX(-50%) rotate(2.5deg); }
+  25%  { transform: translateX(-50%) rotate(1.6deg); }
+  50%  { transform: translateX(-50%) rotate(-1.6deg); }
+  75%  { transform: translateX(-50%) rotate(1.1deg); }
   100% { transform: translateX(-50%) rotate(0deg); }
 }
 
 /* Desktop ONLY (≥641px): đổi sang top-anchored, dùng animation khác */
 @media (min-width: 641px) {
+  :root {
+    --banner-rope-length: clamp(160px, calc(48vh - 50px), 320px);
+    --banner-rope-offset: calc(-1 * var(--banner-rope-length));
+  }
+
   .moon-ribbon-scroll.hanging-banner-drop {
     top: 48%;
     bottom: auto;
@@ -1387,9 +1395,7 @@ button {
   position: absolute;
   z-index: 20;
   left: 50%;
-  top: 48%;
-  bottom: auto;
-  transform: translate(-50%, -50%);
+  /* top/bottom/transform NOT set here — controlled by .hanging-banner-drop and mobile/desktop overrides */
   width: min(92vw, 560px);
   padding: 22px 24px 20px;
   border-radius: 26px;
@@ -2055,10 +2061,10 @@ button {
     border-radius: 20px;
   }
 
-  /* Dây treo vừa phải: điểm chấm cách mép trên ~1 khoảng thoải mái */
+  /* Dây treo tính động theo chiều cao màn hình: điểm chấm luôn cách mép trên ~60px */
   .banner-hanging-string {
-    top: -230px;
-    height: 230px;
+    top: var(--banner-rope-offset);
+    height: var(--banner-rope-length);
   }
 
   .tag-season {
