@@ -533,24 +533,34 @@ export default function Home() {
           <div className="moon-cloud cloud-bottom" />
         </div>
 
-        {/* Thỏ Ngọc bay vòng tròn — to nhỏ xa gần 3D */}
+        {/* Thỏ Ngọc bay vòng tròn 3D + Vệt đuôi trái tim đỏ nối dài phía sau (Ảnh 1) */}
         {isRabbitFlying && (
           <div className="orbit-center" aria-hidden="true">
             <div className="orbit-pivot-ring">
               <span className="orbit-bunny">🐰</span>
+              {/* Vệt đuôi trái tim đỏ nối dài phía sau chú thỏ như cái đuôi */}
+              <div className="bunny-heart-trail">
+                <span className="trail-heart th-1">❤️</span>
+                <span className="trail-heart th-2">💖</span>
+                <span className="trail-heart th-3">💕</span>
+                <span className="trail-heart th-4">❤️</span>
+                <span className="trail-heart th-5">💖</span>
+                <span className="trail-heart th-6">💕</span>
+                <span className="trail-heart th-7">❣️</span>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Thỏ phóng to ra giữa màn hình + hun gió tạo ra trái tim phóng to dần và mờ dần */}
+        {/* Thỏ phóng to ra giữa màn hình + hun gió tạo ra TRÁI TIM HẠT LẤP LÁNH (Ảnh 2) phóng to dần và mờ dần */}
         {isRabbitKissing && (
           <div className="kiss-stage-wrapper" aria-hidden="true">
             {/* Lớp phủ ánh sáng hồng bùng nổ */}
             <div className="kiss-screen-flash" />
 
-            {/* Trái tim tình yêu: Phóng to dần và mờ dần */}
+            {/* Trái tim tình yêu làm bằng chùm hạt trái tim đỏ (như Ảnh 2): Phóng to dần và mờ dần */}
             <div className="kiss-expanding-heart-stage">
-              <div className="kiss-expanding-heart">
+              <div className="kiss-particle-heart-cloud">
                 <svg viewBox="0 0 120 110" className="heart-svg-glow">
                   <defs>
                     <linearGradient id="heartGradPink" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -587,11 +597,37 @@ export default function Home() {
                   </text>
                 </svg>
 
-                {/* Vòng trái tim nhỏ bay bổng quanh trái tim chính */}
-                <span className="orbiting-mini-heart omh-1">💖</span>
-                <span className="orbiting-mini-heart omh-2">💕</span>
-                <span className="orbiting-mini-heart omh-3">💗</span>
-                <span className="orbiting-mini-heart omh-4">💓</span>
+                {/* Các hạt trái tim lấp lánh nổ bung phủ kín hình trái tim (Ảnh 2) */}
+                {[
+                  { x: -45, y: -40, s: 20, d: '0.0s', e: '❤️' },
+                  { x: 45,  y: -40, s: 20, d: '0.05s', e: '❤️' },
+                  { x: 0,   y: -50, s: 22, d: '0.1s', e: '💖' },
+                  { x: -70, y: -20, s: 18, d: '0.12s', e: '❤️' },
+                  { x: 70,  y: -20, s: 18, d: '0.15s', e: '❤️' },
+                  { x: -80, y: 15,  s: 16, d: '0.18s', e: '💕' },
+                  { x: 80,  y: 15,  s: 16, d: '0.22s', e: '💕' },
+                  { x: -50, y: 50,  s: 18, d: '0.25s', e: '❤️' },
+                  { x: 50,  y: 50,  s: 18, d: '0.28s', e: '❤️' },
+                  { x: 0,   y: 75,  s: 22, d: '0.3s', e: '💖' },
+                  { x: -25, y: 10,  s: 16, d: '0.12s', e: '💗' },
+                  { x: 25,  y: 10,  s: 16, d: '0.16s', e: '💗' },
+                  { x: 0,   y: -15, s: 20, d: '0.2s', e: '💓' },
+                  { x: -30, y: -20, s: 18, d: '0.08s', e: '❣️' },
+                  { x: 30,  y: -20, s: 18, d: '0.14s', e: '❣️' },
+                ].map((p, idx) => (
+                  <span
+                    key={idx}
+                    className="heart-cloud-particle"
+                    style={{
+                      left: `calc(50% + ${p.x}px)`,
+                      top: `calc(50% + ${p.y}px)`,
+                      fontSize: `${p.s}px`,
+                      animationDelay: p.d,
+                    }}
+                  >
+                    {p.e}
+                  </span>
+                ))}
               </div>
             </div>
 
@@ -695,9 +731,15 @@ export default function Home() {
           ))}
         </div>
 
-        {/* 5. DẢI THƯ TRĂNG RẰM — hiện sau khi Thỏ Ngọc bay xong */}
+        {/* 5. DẢI THƯ TRĂNG RẰM — Rơi từ trên xuống, có sợi dây nối ở giữa, đung đưa lũng lẳng ngay giữa màn hình */}
         {showBannerCard && showScrollNote ? (
-          <div className="moon-ribbon-scroll">
+          <div className="moon-ribbon-scroll hanging-banner-drop">
+            {/* Sợi dây treo lụa hồng/vàng nối từ đỉnh màn hình xuống phần giữa cạnh trên banner */}
+            <div className="banner-hanging-string">
+              <span className="string-ring" />
+              <span className="string-line" />
+            </div>
+
             <div className="scroll-header">
               <span className="tag-season">TẾT TRUNG THU · ĐÊM RẰM ĐOÀN VIÊN</span>
               <button
