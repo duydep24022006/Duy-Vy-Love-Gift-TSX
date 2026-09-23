@@ -1108,13 +1108,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Nhạc nền romantic lofi piano + Pentatonic Web Audio synth fallback */}
+      {/* Nhạc nền: Tự động phát file /music.mp3 trong thư mục public hoặc link dự phòng */}
       <audio
         ref={bgmAudioRef}
         loop
         preload="auto"
-        src="https://assets.mixkit.co/music/preview/mixkit-romantic-piano-126.mp3"
-      />
+      >
+        <source src="/music.mp3" type="audio/mpeg" />
+        <source src="https://assets.mixkit.co/music/preview/mixkit-romantic-piano-126.mp3" type="audio/mpeg" />
+      </audio>
     </main>
   );
 }
