@@ -1309,10 +1309,11 @@ button {
   top: auto;
   bottom: max(78px, calc(env(safe-area-inset-bottom) + 66px));
   transform: translateX(-50%);
-  transform-origin: bottom center;
+  /* top center = trục lắc ở đỉnh banner, giống lồng đèn thật treo dây */
+  transform-origin: top center;
   animation:
     bannerDropMobile 1.1s cubic-bezier(0.175, 0.885, 0.32, 1.22) forwards,
-    bannerDangleMobile 4.2s 1.1s ease-in-out infinite alternate;
+    bannerDangleMobile 5s 1.2s ease-in-out infinite alternate;
   will-change: transform, opacity;
 }
 
@@ -1335,10 +1336,12 @@ button {
   }
 }
 
+/* Đung đưa nhẹ nhàng như lồng đèn treo dây (pivot ở trên, đáy lắc qua lại) */
 @keyframes bannerDangleMobile {
-  0% { transform: translateX(-50%) rotate(0deg); }
-  25% { transform: translateX(-50%) rotate(2.8deg); }
-  75% { transform: translateX(-50%) rotate(-2.8deg); }
+  0%   { transform: translateX(-50%) rotate(0deg); }
+  20%  { transform: translateX(-50%) rotate(3.5deg); }
+  50%  { transform: translateX(-50%) rotate(-3.5deg); }
+  80%  { transform: translateX(-50%) rotate(2.5deg); }
   100% { transform: translateX(-50%) rotate(0deg); }
 }
 
@@ -2052,10 +2055,10 @@ button {
     border-radius: 20px;
   }
 
-  /* Dây treo dài hơn trên mobile để kéo dài đẹp từ đỉnh xuống */
+  /* Dây treo vừa phải: điểm chấm cách mép trên ~1 khoảng thoải mái */
   .banner-hanging-string {
-    top: -300px;
-    height: 300px;
+    top: -160px;
+    height: 160px;
   }
 
   .tag-season {
