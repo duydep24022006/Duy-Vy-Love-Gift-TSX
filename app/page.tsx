@@ -125,6 +125,200 @@ function playMidAutumnSound(variant: "open" | "hop" | "lantern" | "kiss" = "open
   }
 }
 
+// Canvas Hiệu Ứng Trái Tim Hạt Đỏ (Ảnh 2) & Vệt Đuôi Trái Tim Theo Đuôi Thỏ Bay (Ảnh 1)
+function LoveParticleCanvas({
+  isFlying,
+  isKissing,
+}: {
+  isFlying: boolean;
+  isKissing: boolean;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+    const startTime = performance.now();
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", handleResize);
+
+    // Dynamic Trail Particles for Flying Bunny (Ảnh 1)
+    const trailParticles: Array<{
+      x: number;
+      y: number;
+      size: number;
+      alpha: number;
+      vx: number;
+      vy: number;
+      char: string;
+    }> = [];
+
+    // 380 Glowing Red Particle Hearts for Image 2 Heart Cloud
+    const heartCloudParticles: Array<{
+      targetX: number;
+      targetY: number;
+      size: number;
+      color: string;
+      alpha: number;
+    }> = [];
+
+    const heartColors = [
+      "#ff0044",
+      "#ff1744",
+      "#d50000",
+      "#ff4081",
+      "#ff5252",
+      "#e91e63",
+      "#ff0022",
+      "#ff3366",
+    ];
+
+    for (let i = 0; i < 380; i++) {
+      const t = Math.random() * Math.PI * 2;
+      const hx = 16 * Math.pow(Math.sin(t), 3);
+      const hy = -(
+        13 * Math.cos(t) -
+        5 * Math.cos(2 * t) -
+        2 * Math.cos(3 * t) -
+        Math.cos(4 * t)
+      );
+
+      const fillFactor = Math.sqrt(Math.random());
+      const rScale = Math.min(width, height) * 0.015;
+
+      heartCloudParticles.push({
+        targetX: hx * fillFactor * rScale + (Math.random() - 0.5) * 14,
+        targetY: hy * fillFactor * rScale + (Math.random() - 0.5) * 14,
+        size: Math.random() * 5 + 2.5,
+        color: heartColors[Math.floor(Math.random() * heartColors.length)],
+        alpha: 0.85 + Math.random() * 0.15,
+      });
+    }
+
+    let kissStartTime = 0;
+
+    const render = (now: number) => {
+      const elapsed = (now - startTime) / 1000;
+      ctx.clearRect(0, 0, width, height);
+
+      // 1. DYNAMIC HEART TAIL TRAILING BEHIND FLYING RABBIT (Ảnh 1)
+      if (isFlying) {
+        const progress = Math.min(elapsed / 3.1, 1);
+        const angle = progress * Math.PI * 3; // 1.5 turns
+        const rx = Math.min(width * 0.35, 220);
+        const ry = Math.min(height * 0.25, 140);
+        const cx = width / 2;
+        const cy = height * 0.42;
+
+        const bx = cx + Math.cos(angle) * rx;
+        const by = cy + Math.sin(angle) * ry;
+
+        const trailChars = ["❤️", "💖", "💕", "❣️"];
+        for (let k = 0; k < 2; k++) {
+          trailParticles.push({
+            x: bx + (Math.random() - 0.5) * 16,
+            y: by + (Math.random() - 0.5) * 16,
+            size: Math.random() * 14 + 14,
+            alpha: 1,
+            vx: -Math.cos(angle) * 2 + (Math.random() - 0.5) * 1.5,
+            vy: -Math.sin(angle) * 2 + (Math.random() - 0.5) * 1.5,
+            char: trailChars[Math.floor(Math.random() * trailChars.length)],
+          });
+        }
+      }
+
+      // Render & update trail particles
+      for (let i = trailParticles.length - 1; i >= 0; i--) {
+        const p = trailParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= 0.035;
+        p.size *= 0.96;
+
+        if (p.alpha <= 0) {
+          trailParticles.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.shadowColor = "#ff004d";
+        ctx.shadowBlur = 12;
+        ctx.font = `${p.size}px sans-serif`;
+        ctx.fillText(p.char, p.x, p.y);
+        ctx.restore();
+      }
+
+      // 2. HIGH-DENSITY RED PARTICLE HEART EXPLOSION ON KISS (Ảnh 2 - NO TEXT)
+      if (isKissing) {
+        if (!kissStartTime) kissStartTime = now;
+        const kElapsed = (now - kissStartTime) / 1000;
+
+        const scaleFactor = 0.35 + kElapsed * 1.35;
+        const globalAlpha = Math.max(0, 1 - kElapsed * 0.42);
+
+        ctx.save();
+        ctx.translate(width / 2, height * 0.44);
+
+        heartCloudParticles.forEach((p) => {
+          const px = p.targetX * scaleFactor;
+          const py = p.targetY * scaleFactor;
+          const a = p.alpha * globalAlpha;
+
+          if (a > 0.01) {
+            ctx.save();
+            ctx.globalAlpha = a;
+            ctx.fillStyle = p.color;
+            ctx.shadowColor = "#ff0044";
+            ctx.shadowBlur = 14;
+
+            ctx.beginPath();
+            ctx.arc(px, py, p.size * (0.8 + scaleFactor * 0.25), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        });
+
+        ctx.restore();
+      } else {
+        kissStartTime = 0;
+      }
+
+      animId = requestAnimationFrame(render);
+    };
+
+    animId = requestAnimationFrame(render);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isFlying, isKissing]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: "fixed",
+        inset: 0,
+        pointerEvents: "none",
+        zIndex: 34,
+      }}
+    />
+  );
+}
+
 // Chiếc lồng đèn có thể cầm chuột hoặc ngón tay để kéo đi khắp màn hình
 function DraggableLantern({
   type,
@@ -518,6 +712,9 @@ export default function Home() {
         className={`moonlight-scene ${phase === "moonlight" ? "is-visible" : ""}`}
         aria-hidden={phase !== "moonlight"}
       >
+        {/* Canvas Engine Xử Lý Trái Tim Hạt Đỏ (Ảnh 2) & Đuôi Trái Tim Thỏ Bay (Ảnh 1) */}
+        <LoveParticleCanvas isFlying={isRabbitFlying} isKissing={isRabbitKissing} />
+
         {/* 1. MẶT TRĂNG RẰM KHỔNG LỒ (VÀNG RỰC RỠ, HÀO QUANG ÁM ÁP) */}
         <div className="full-moon-container" onClick={interactRabbit} title="Chạm vào trăng rằm">
           <div className="moon-glow-outer" />
@@ -583,18 +780,6 @@ export default function Home() {
                     fill="url(#heartGradPink)"
                     filter="url(#heartNeon)"
                   />
-                  <text
-                    x="60"
-                    y="55"
-                    textAnchor="middle"
-                    fill="#ffffff"
-                    fontSize="9.5"
-                    fontWeight="bold"
-                    letterSpacing="0.8"
-                    style={{ textShadow: "0 0 8px rgba(255,255,255,0.95)" }}
-                  >
-                    Duy ♥ Vy
-                  </text>
                 </svg>
 
                 {/* Các hạt trái tim lấp lánh nổ bung phủ kín hình trái tim (Ảnh 2) */}
