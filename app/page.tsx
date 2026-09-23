@@ -427,7 +427,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* Th\u1ecf \u0111\u1ebfn gi\u1eefa m\u00e0n h\u00ecnh \u2014 ph\u00e9p thu\u1eadt WIN: tim b\u1eafn 12 h\u01b0\u1edbng, sao v\u1ee5t 8 h\u01b0\u1edbng, s\u00f3ng x\u00fac \u0111\u1ed9ng n\u1ed5 t\u1ee9a */}
+        {/* Thỏ đến giữa màn hình — phép thuật WIN: tim bắn 12 hướng, sao vút 8 hướng, sóng xúc động nổ tứa */}
         {isRabbitKissing && (
           <div className="kissing-center-stage" aria-hidden="true">
             {/* Screen bloom flash */}
@@ -438,14 +438,14 @@ export default function Home() {
             <div className="kiss-ring kr-3" />
             {/* 8 sparkle stars radiating outward */}
             {([
-              { e: '\u2728', sx: '-145px', sy: '-125px', d: '0.20s', s: '28px' },
-              { e: '\u2b50', sx: '18px',   sy: '-165px', d: '0.30s', s: '32px' },
-              { e: '\u2728', sx: '155px',  sy: '-105px', d: '0.24s', s: '26px' },
-              { e: '\u2b50', sx: '165px',  sy: '28px',   d: '0.38s', s: '30px' },
-              { e: '\u2728', sx: '105px',  sy: '145px',  d: '0.32s', s: '24px' },
-              { e: '\u2b50', sx: '-28px',  sy: '168px',  d: '0.44s', s: '28px' },
-              { e: '\u2728', sx: '-155px', sy: '105px',  d: '0.28s', s: '32px' },
-              { e: '\u2b50', sx: '-165px', sy: '-32px',  d: '0.36s', s: '26px' },
+              { e: '✨', sx: '-145px', sy: '-125px', d: '0.20s', s: '28px' },
+              { e: '⭐', sx: '18px',   sy: '-165px', d: '0.30s', s: '32px' },
+              { e: '✨', sx: '155px',  sy: '-105px', d: '0.24s', s: '26px' },
+              { e: '⭐', sx: '165px',  sy: '28px',   d: '0.38s', s: '30px' },
+              { e: '✨', sx: '105px',  sy: '145px',  d: '0.32s', s: '24px' },
+              { e: '⭐', sx: '-28px',  sy: '168px',  d: '0.44s', s: '28px' },
+              { e: '✨', sx: '-155px', sy: '105px',  d: '0.28s', s: '32px' },
+              { e: '⭐', sx: '-165px', sy: '-32px',  d: '0.36s', s: '26px' },
             ] as const).map((sp, i) => (
               <span
                 key={i}
@@ -455,21 +455,21 @@ export default function Home() {
             ))}
             {/* Bunny + lips + 12 hearts bursting in ALL directions */}
             <div className="kissing-rabbit">
-              <span className="kiss-bunny">\ud83d\udc30</span>
-              <span className="kiss-lips">\ud83d\ude18</span>
+              <span className="kiss-bunny">🐰</span>
+              <span className="kiss-lips">😘</span>
               {([
-                { e: '\ud83d\udc95', tx: '-95px',  ty: '-115px', d: '0.22s', dur: '1.3s', s: '28px' },
-                { e: '\u2764\ufe0f', tx: '0px',    ty: '-148px', d: '0.30s', dur: '1.5s', s: '36px' },
-                { e: '\ud83d\udc96', tx: '95px',   ty: '-115px', d: '0.26s', dur: '1.2s', s: '26px' },
-                { e: '\ud83d\udc97', tx: '145px',  ty: '0px',    d: '0.40s', dur: '1.4s', s: '32px' },
-                { e: '\ud83d\udc9d', tx: '105px',  ty: '105px',  d: '0.34s', dur: '1.3s', s: '24px' },
-                { e: '\ud83d\udc98', tx: '0px',    ty: '145px',  d: '0.48s', dur: '1.5s', s: '30px' },
-                { e: '\ud83d\udc95', tx: '-105px', ty: '105px',  d: '0.36s', dur: '1.2s', s: '26px' },
-                { e: '\u2764\ufe0f', tx: '-145px', ty: '0px',    d: '0.42s', dur: '1.4s', s: '34px' },
-                { e: '\ud83d\udc96', tx: '-68px',  ty: '-136px', d: '0.24s', dur: '1.1s', s: '22px' },
-                { e: '\ud83d\udc97', tx: '68px',   ty: '-136px', d: '0.52s', dur: '1.3s', s: '28px' },
-                { e: '\ud83d\udc9d', tx: '136px',  ty: '-68px',  d: '0.28s', dur: '1.2s', s: '20px' },
-                { e: '\ud83d\udc98', tx: '-136px', ty: '-68px',  d: '0.46s', dur: '1.4s', s: '24px' },
+                { e: '💕', tx: '-95px',  ty: '-115px', d: '0.22s', dur: '1.3s', s: '28px' },
+                { e: '❤️', tx: '0px',    ty: '-148px', d: '0.30s', dur: '1.5s', s: '36px' },
+                { e: '💖', tx: '95px',   ty: '-115px', d: '0.26s', dur: '1.2s', s: '26px' },
+                { e: '💗', tx: '145px',  ty: '0px',    d: '0.40s', dur: '1.4s', s: '32px' },
+                { e: '💝', tx: '105px',  ty: '105px',  d: '0.34s', dur: '1.3s', s: '24px' },
+                { e: '💘', tx: '0px',    ty: '145px',  d: '0.48s', dur: '1.5s', s: '30px' },
+                { e: '💕', tx: '-105px', ty: '105px',  d: '0.36s', dur: '1.2s', s: '26px' },
+                { e: '❤️', tx: '-145px', ty: '0px',    d: '0.42s', dur: '1.4s', s: '34px' },
+                { e: '💖', tx: '-68px',  ty: '-136px', d: '0.24s', dur: '1.1s', s: '22px' },
+                { e: '💗', tx: '68px',   ty: '-136px', d: '0.52s', dur: '1.3s', s: '28px' },
+                { e: '💝', tx: '136px',  ty: '-68px',  d: '0.28s', dur: '1.2s', s: '20px' },
+                { e: '💘', tx: '-136px', ty: '-68px',  d: '0.46s', dur: '1.4s', s: '24px' },
               ] as const).map((h, i) => (
                 <span
                   key={i}
