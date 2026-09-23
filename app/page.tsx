@@ -125,6 +125,85 @@ function playMidAutumnSound(variant: "open" | "hop" | "lantern" | "kiss" = "open
   }
 }
 
+// Continuous Pentatonic Asian Music Engine (Fallback / Ambient Synthesizer BGM)
+class AmbientBgmEngine {
+  private ctx: AudioContext | null = null;
+  private gainNode: GainNode | null = null;
+  private isPlaying = false;
+  private timer: number | null = null;
+
+  start() {
+    if (this.isPlaying) return;
+    try {
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as typeof window & { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext;
+      if (!AudioContextClass) return;
+      this.ctx = new AudioContextClass();
+      if (this.ctx.state === "suspended") {
+        this.ctx.resume();
+      }
+      this.gainNode = this.ctx.createGain();
+      this.gainNode.gain.setValueAtTime(0.001, this.ctx.currentTime);
+      this.gainNode.gain.exponentialRampToValueAtTime(0.05, this.ctx.currentTime + 1.2);
+      this.gainNode.connect(this.ctx.destination);
+      this.isPlaying = true;
+
+      const scale = [392.0, 440.0, 493.88, 587.33, 659.25, 783.99, 880.0, 987.77, 1174.66];
+      let step = 0;
+
+      const tick = () => {
+        if (!this.isPlaying || !this.ctx || !this.gainNode) return;
+        const freq = scale[step % scale.length];
+        step = (step + (Math.random() > 0.4 ? 1 : 2)) % scale.length;
+
+        const osc = this.ctx.createOscillator();
+        const noteGain = this.ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+        noteGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+        noteGain.gain.exponentialRampToValueAtTime(0.04 + Math.random() * 0.03, this.ctx.currentTime + 0.12);
+        noteGain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 2.2);
+
+        osc.connect(noteGain);
+        noteGain.connect(this.gainNode);
+
+        osc.start(this.ctx.currentTime);
+        osc.stop(this.ctx.currentTime + 2.3);
+
+        const delay = 480 + Math.random() * 520;
+        this.timer = window.setTimeout(tick, delay);
+      };
+
+      tick();
+    } catch {
+      /* Fallback */
+    }
+  }
+
+  stop() {
+    this.isPlaying = false;
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+    if (this.gainNode && this.ctx) {
+      try {
+        this.gainNode.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.4);
+        setTimeout(() => {
+          this.ctx?.close();
+          this.ctx = null;
+        }, 450);
+      } catch {}
+    }
+  }
+}
+
+const bgmEngine = new AmbientBgmEngine();
+
 // Canvas Engine Xử Lý Trái Tim Hạt Đỏ (Ảnh 2) & Vệt Đuôi Trái Tim Theo Đuôi Thỏ Bay Rộng Màn Hình (Ảnh 1)
 function LoveParticleCanvas({
   isActive,
@@ -242,19 +321,19 @@ function LoveParticleCanvas({
         let isOrbiting = false;
 
         // Stage Timeline:
-        // 0.0s - 3.0s: Orbit flying wide screen (Stage 1)
-        // 3.0s - 3.7s: Swoop into exact center (Stage 2)
-        // 3.7s - 4.2s: Stop in center & pucker face 😚 (Stage 3 - Pause)
-        // 4.2s - 6.2s: Red particle heart explosion erupts from rabbit mouth in center (Stage 4)
-        // 5.6s: Banner drops down from top (Stage 5)
-        // 6.4s: Complete (Stage 6)
+        // 0.0s - 2.5s: Orbit flying wide screen (Stage 1 - EXACTLY 1 ROTATION)
+        // 2.5s - 3.2s: Swoop into exact center (Stage 2)
+        // 3.2s - 3.7s: Stop in center & pucker face 😚 (Stage 3 - Pause)
+        // 3.7s - 5.8s: Red particle heart explosion erupts from rabbit mouth in center (Stage 4)
+        // 5.0s: Banner drops down from top (Stage 5)
+        // 5.8s: Complete (Stage 6)
 
-        if (elapsed < 3.0) {
-          // STAGE 1: Orbit Flying Wide Screen
+        if (elapsed < 2.5) {
+          // STAGE 1: Orbit Flying Wide Screen (1 Single Elegant Orbit)
           isOrbiting = true;
-          const tProgress = elapsed / 3.0;
+          const tProgress = elapsed / 2.5;
           const easedProgress = Math.sin(tProgress * Math.PI * 0.5);
-          const angle = easedProgress * Math.PI * 3; // 1.5 turns
+          const angle = easedProgress * Math.PI * 2; // EXACTLY 1 Rotation!
 
           const rx = width * 0.42;
           const ry = height * 0.34;
@@ -263,20 +342,20 @@ function LoveParticleCanvas({
           targetY = cy + Math.sin(angle) * ry;
 
           const depthFactor = (Math.sin(angle) + 1) / 2; // 0 to 1
-          const zoomPulse = Math.sin(elapsed * 12) * 0.08;
+          const zoomPulse = Math.sin(elapsed * 10) * 0.08;
           targetScale = 0.45 + depthFactor * 1.65 + zoomPulse; // 0.45x -> 2.18x depth zoom
           emoji = "🐰";
-        } else if (elapsed < 3.7) {
+        } else if (elapsed < 3.2) {
           // STAGE 2: Smooth Swoop into Exact Center
           isOrbiting = true;
           targetX = cx;
           targetY = cy;
           targetScale = 1.85;
           emoji = "🐰";
-        } else if (elapsed < 4.2) {
+        } else if (elapsed < 3.7) {
           // STAGE 3: Stop gracefully in center, turn to Kiss Face 😚, sound trigger
           targetX = cx;
-          targetY = cy + Math.sin((elapsed - 3.7) * 8) * 5; // Gentle hover bobbing
+          targetY = cy + Math.sin((elapsed - 3.2) * 8) * 5; // Gentle hover bobbing
           targetScale = 2.05;
           emoji = "😚";
 
@@ -284,12 +363,12 @@ function LoveParticleCanvas({
             kissSoundFired = true;
             onPlayKissSound();
           }
-        } else if (elapsed < 6.4) {
+        } else if (elapsed < 5.8) {
           // STAGE 4: Red Heart Explosion Erupts from Rabbit Mouth in Center!
           targetX = cx;
-          targetY = cy + Math.sin((elapsed - 4.2) * 6) * 4;
+          targetY = cy + Math.sin((elapsed - 3.7) * 6) * 4;
           targetScale = 2.0;
-          emoji = elapsed - 4.2 > 1.2 ? "🥰" : "😚";
+          emoji = elapsed - 3.7 > 1.2 ? "🥰" : "😚";
 
           if (!explosionStartTime) explosionStartTime = now;
           const kElapsed = (now - explosionStartTime) / 1000;
@@ -321,8 +400,8 @@ function LoveParticleCanvas({
 
           ctx.restore();
 
-          // Stage 5: Banner trigger at ~5.6s
-          if (elapsed >= 5.6 && !bannerFired) {
+          // Stage 5: Banner trigger at ~5.0s
+          if (elapsed >= 5.0 && !bannerFired) {
             bannerFired = true;
             onShowBanner();
           }
@@ -557,6 +636,7 @@ export default function Home() {
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const bgmAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Background stars
   const stars = useMemo(
@@ -628,15 +708,49 @@ export default function Home() {
     []
   );
 
+  useEffect(() => {
+    if (soundOn && phase !== "intro") {
+      if (bgmAudioRef.current) {
+        bgmAudioRef.current
+          .play()
+          .then(() => {
+            bgmEngine.stop();
+          })
+          .catch(() => {
+            bgmEngine.start();
+          });
+      } else {
+        bgmEngine.start();
+      }
+    } else {
+      bgmAudioRef.current?.pause();
+      bgmEngine.stop();
+    }
+
+    return () => {
+      bgmEngine.stop();
+    };
+  }, [soundOn, phase]);
+
   useEffect(() => () => {
     if (timerRef.current) clearTimeout(timerRef.current);
     if (flyTimerRef.current) clearTimeout(flyTimerRef.current);
+    bgmEngine.stop();
   }, []);
 
   const openCelebration = useCallback(() => {
     if (phase !== "intro") return;
     setPhase("opening");
-    if (soundOn) playMidAutumnSound("open");
+    if (soundOn) {
+      playMidAutumnSound("open");
+      if (bgmAudioRef.current) {
+        bgmAudioRef.current.play().catch(() => {
+          bgmEngine.start();
+        });
+      } else {
+        bgmEngine.start();
+      }
+    }
     timerRef.current = setTimeout(() => {
       setPhase("moonlight");
       setIsRabbitFlying(true);
@@ -992,6 +1106,14 @@ export default function Home() {
           </button>
         </div>
       </section>
+
+      {/* Nhạc nền romantic lofi piano + Pentatonic Web Audio synth fallback */}
+      <audio
+        ref={bgmAudioRef}
+        loop
+        preload="auto"
+        src="https://assets.mixkit.co/music/preview/mixkit-romantic-piano-126.mp3"
+      />
     </main>
   );
 }
