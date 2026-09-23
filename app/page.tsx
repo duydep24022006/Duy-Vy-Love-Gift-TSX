@@ -125,13 +125,17 @@ function playMidAutumnSound(variant: "open" | "hop" | "lantern" | "kiss" = "open
   }
 }
 
-// Canvas Hiệu Ứng Trái Tim Hạt Đỏ (Ảnh 2) & Vệt Đuôi Trái Tim Theo Đuôi Thỏ Bay Rộng Màn Hình (Ảnh 1)
+// Canvas Engine Xử Lý Trái Tim Hạt Đỏ (Ảnh 2) & Vệt Đuôi Trái Tim Theo Đuôi Thỏ Bay Rộng Màn Hình (Ảnh 1)
 function LoveParticleCanvas({
-  isFlying,
-  isKissing,
+  isActive,
+  onPlayKissSound,
+  onShowBanner,
+  onComplete,
 }: {
-  isFlying: boolean;
-  isKissing: boolean;
+  isActive: boolean;
+  onPlayKissSound: () => void;
+  onShowBanner: () => void;
+  onComplete: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -143,6 +147,7 @@ function LoveParticleCanvas({
 
     let animId: number;
     const startTime = performance.now();
+    let lastTime = performance.now();
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
@@ -153,7 +158,7 @@ function LoveParticleCanvas({
     };
     window.addEventListener("resize", handleResize);
 
-    // Dynamic Trail Particles for Flying Bunny (Ảnh 1) - Tự mất sau ~0.7s - 1.0s
+    // Dynamic Trail Particles for Flying Bunny (Ảnh 1)
     const trailParticles: Array<{
       x: number;
       y: number;
@@ -166,7 +171,7 @@ function LoveParticleCanvas({
       maxLife: number;
     }> = [];
 
-    // 420 Glowing Red Particle Hearts for Image 2 Heart Cloud
+    // 450 Glowing Red Particle Hearts for Image 2 Heart Cloud
     const heartCloudParticles: Array<{
       targetX: number;
       targetY: number;
@@ -187,7 +192,7 @@ function LoveParticleCanvas({
       "#c2185b",
     ];
 
-    for (let i = 0; i < 420; i++) {
+    for (let i = 0; i < 450; i++) {
       const t = Math.random() * Math.PI * 2;
       const hx = 16 * Math.pow(Math.sin(t), 3);
       const hy = -(
@@ -209,76 +214,180 @@ function LoveParticleCanvas({
       });
     }
 
-    let kissStartTime = 0;
+    // Physics Lerp Position State for Rabbit
+    let curX = width / 2;
+    let curY = height * 0.44;
+    let curScale = 1.0;
+
+    let kissSoundFired = false;
+    let bannerFired = false;
+    let completeFired = false;
+    let explosionStartTime = 0;
 
     const render = (now: number) => {
       const elapsed = (now - startTime) / 1000;
+      const dt = Math.min((now - lastTime) / 1000, 0.08);
+      lastTime = now;
+
       ctx.clearRect(0, 0, width, height);
 
-      // 1. DYNAMIC RABBIT FLYING ACROSS ENTIRE SCREEN + HEART TAIL + 3D ZOOM IN / ZOOM OUT (Ảnh 1)
-      if (isFlying) {
-        // Smooth 60fps flight time: 3.2s total duration for 1.5 turns
-        const duration = 3.2;
-        const rawProgress = Math.min(elapsed / duration, 1);
-
-        // Eased progress for ultra-smooth micro-step motion
-        const easedProgress = Math.sin(rawProgress * Math.PI * 0.5);
-        const angle = easedProgress * Math.PI * 3; // 1.5 turns
-
-        // Smooth 3D elliptical flight path
-        const rx = width * 0.42;
-        const ry = height * 0.34;
+      if (isActive) {
         const cx = width / 2;
         const cy = height * 0.44;
 
-        const bx = cx + Math.cos(angle) * rx;
-        const by = cy + Math.sin(angle) * ry;
+        let targetX = cx;
+        let targetY = cy;
+        let targetScale = 1.0;
+        let emoji = "🐰";
+        let isOrbiting = false;
 
-        // Dynamic 3D Zoom In / Zoom Out:
-        // Top of orbit (sin = -1): thu nhỏ 0.45x (xa, mờ nhẹ)
-        // Bottom of orbit (sin = +1): phóng to 2.18x (gần, rực rỡ)
-        // Plus subtle 3D breathing pulse oscillation
-        const depthFactor = (Math.sin(angle) + 1) / 2; // 0 to 1
-        const zoomPulse = Math.sin(elapsed * 12) * 0.08;
-        const scale = 0.45 + depthFactor * 1.65 + zoomPulse; // 0.45x -> 2.18x!
+        // Stage Timeline:
+        // 0.0s - 3.0s: Orbit flying wide screen (Stage 1)
+        // 3.0s - 3.7s: Swoop into exact center (Stage 2)
+        // 3.7s - 4.2s: Stop in center & pucker face 😚 (Stage 3 - Pause)
+        // 4.2s - 6.2s: Red particle heart explosion erupts from rabbit mouth in center (Stage 4)
+        // 5.6s: Banner drops down from top (Stage 5)
+        // 6.4s: Complete (Stage 6)
 
-        const bunnyFontSize = Math.max(20, Math.round(52 * scale));
+        if (elapsed < 3.0) {
+          // STAGE 1: Orbit Flying Wide Screen
+          isOrbiting = true;
+          const tProgress = elapsed / 3.0;
+          const easedProgress = Math.sin(tProgress * Math.PI * 0.5);
+          const angle = easedProgress * Math.PI * 3; // 1.5 turns
 
-        // Draw Bunny Emoji with 3D Depth Glow & Zoom
-        ctx.save();
-        ctx.globalAlpha = Math.min(1, 0.65 + depthFactor * 0.35);
-        ctx.font = `${bunnyFontSize}px sans-serif`;
-        ctx.shadowColor = depthFactor > 0.6 ? "#ffe082" : "#ffd54f";
-        ctx.shadowBlur = Math.round(10 + depthFactor * 30);
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("🐰", bx, by);
-        ctx.restore();
+          const rx = width * 0.42;
+          const ry = height * 0.34;
 
-        // Sub-step particle emission for ultra-smooth heart tail (Ảnh 1)
-        const trailChars = ["❤️", "💖", "💕", "❣️"];
-        const emitCount = scale > 1.2 ? 3 : 2;
-        for (let k = 0; k < emitCount; k++) {
-          trailParticles.push({
-            x: bx - Math.cos(angle) * 18 + (Math.random() - 0.5) * 12,
-            y: by - Math.sin(angle) * 18 + (Math.random() - 0.5) * 12,
-            size: (Math.random() * 8 + 12) * scale,
-            alpha: 0.95,
-            vx: -Math.cos(angle) * 2.2 + (Math.random() - 0.5) * 1.2,
-            vy: -Math.sin(angle) * 2.2 + (Math.random() - 0.5) * 1.2,
-            char: trailChars[Math.floor(Math.random() * trailChars.length)],
-            life: 0,
-            maxLife: 0.6 + Math.random() * 0.3, // ~0.6s - 0.9s decay
+          targetX = cx + Math.cos(angle) * rx;
+          targetY = cy + Math.sin(angle) * ry;
+
+          const depthFactor = (Math.sin(angle) + 1) / 2; // 0 to 1
+          const zoomPulse = Math.sin(elapsed * 12) * 0.08;
+          targetScale = 0.45 + depthFactor * 1.65 + zoomPulse; // 0.45x -> 2.18x depth zoom
+          emoji = "🐰";
+        } else if (elapsed < 3.7) {
+          // STAGE 2: Smooth Swoop into Exact Center
+          isOrbiting = true;
+          targetX = cx;
+          targetY = cy;
+          targetScale = 1.85;
+          emoji = "🐰";
+        } else if (elapsed < 4.2) {
+          // STAGE 3: Stop gracefully in center, turn to Kiss Face 😚, sound trigger
+          targetX = cx;
+          targetY = cy + Math.sin((elapsed - 3.7) * 8) * 5; // Gentle hover bobbing
+          targetScale = 2.05;
+          emoji = "😚";
+
+          if (!kissSoundFired) {
+            kissSoundFired = true;
+            onPlayKissSound();
+          }
+        } else if (elapsed < 6.4) {
+          // STAGE 4: Red Heart Explosion Erupts from Rabbit Mouth in Center!
+          targetX = cx;
+          targetY = cy + Math.sin((elapsed - 4.2) * 6) * 4;
+          targetScale = 2.0;
+          emoji = elapsed - 4.2 > 1.2 ? "🥰" : "😚";
+
+          if (!explosionStartTime) explosionStartTime = now;
+          const kElapsed = (now - explosionStartTime) / 1000;
+
+          const scaleFactor = 0.2 + Math.pow(kElapsed, 0.85) * 1.45;
+          const globalAlpha = Math.max(0, 1 - Math.pow(kElapsed / 2.0, 1.4));
+
+          ctx.save();
+          ctx.translate(curX, curY); // Burst directly from center / rabbit mouth!
+
+          heartCloudParticles.forEach((p) => {
+            const px = p.targetX * scaleFactor;
+            const py = p.targetY * scaleFactor;
+            const a = p.alpha * globalAlpha;
+
+            if (a > 0.01) {
+              ctx.save();
+              ctx.globalAlpha = a;
+              ctx.fillStyle = p.color;
+              ctx.shadowColor = "#ff0044";
+              ctx.shadowBlur = Math.round(12 * (1 + scaleFactor * 0.4));
+
+              ctx.beginPath();
+              ctx.arc(px, py, p.size * (0.85 + scaleFactor * 0.25), 0, Math.PI * 2);
+              ctx.fill();
+              ctx.restore();
+            }
           });
+
+          ctx.restore();
+
+          // Stage 5: Banner trigger at ~5.6s
+          if (elapsed >= 5.6 && !bannerFired) {
+            bannerFired = true;
+            onShowBanner();
+          }
+        } else {
+          // Stage 6: Complete
+          if (!completeFired) {
+            completeFired = true;
+            onComplete();
+          }
+        }
+
+        // Ultra-smooth 60fps/120fps physics lerp smoothing
+        const lerpFactor = 1 - Math.exp(-14 * dt);
+        const prevX = curX;
+        const prevY = curY;
+
+        curX += (targetX - curX) * lerpFactor;
+        curY += (targetY - curY) * lerpFactor;
+        curScale += (targetScale - curScale) * lerpFactor;
+
+        // Emit Heart Tail Particles when rabbit is flying/swooping
+        if (isOrbiting) {
+          const dx = curX - prevX;
+          const dy = curY - prevY;
+          const speed = Math.hypot(dx, dy);
+
+          if (speed > 0.8) {
+            const trailChars = ["❤️", "💖", "💕", "❣️"];
+            const count = curScale > 1.2 ? 3 : 2;
+            for (let k = 0; k < count; k++) {
+              trailParticles.push({
+                x: curX - dx * 0.8 + (Math.random() - 0.5) * 14,
+                y: curY - dy * 0.8 + (Math.random() - 0.5) * 14,
+                size: (Math.random() * 8 + 14) * curScale,
+                alpha: 0.95,
+                vx: -dx * 0.25 + (Math.random() - 0.5) * 1.5,
+                vy: -dy * 0.25 + (Math.random() - 0.5) * 1.5,
+                char: trailChars[Math.floor(Math.random() * trailChars.length)],
+                life: 0,
+                maxLife: 0.6 + Math.random() * 0.3,
+              });
+            }
+          }
+        }
+
+        // Draw Bunny Emoji on Canvas with high-res glow & depth
+        if (elapsed < 6.4) {
+          ctx.save();
+          const bunnyFontSize = Math.max(22, Math.round(50 * curScale));
+          ctx.font = `${bunnyFontSize}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`;
+          ctx.shadowColor = elapsed >= 3.7 ? "#ff4081" : "#ffe082";
+          ctx.shadowBlur = Math.round(14 + curScale * 16);
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(emoji, curX, curY);
+          ctx.restore();
         }
       }
 
-      // Render & update trail particles (fade out in ~0.7s - 1s)
+      // Render & update trail particles (fade out in ~0.6s - 0.9s)
       for (let i = trailParticles.length - 1; i >= 0; i--) {
         const p = trailParticles[i];
         p.x += p.vx;
         p.y += p.vy;
-        p.life += 0.016; // ~60fps step
+        p.life += dt;
         p.alpha = Math.max(0, 1 - p.life / p.maxLife);
         p.size *= 0.97;
 
@@ -291,44 +400,9 @@ function LoveParticleCanvas({
         ctx.globalAlpha = p.alpha;
         ctx.shadowColor = "#ff004d";
         ctx.shadowBlur = 12;
-        ctx.font = `${p.size}px sans-serif`;
+        ctx.font = `${p.size}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
         ctx.fillText(p.char, p.x, p.y);
         ctx.restore();
-      }
-
-      // 2. HIGH-DENSITY RED PARTICLE HEART EXPLOSION ON KISS (Ảnh 2 - NO SVG, NO TEXT)
-      if (isKissing) {
-        if (!kissStartTime) kissStartTime = now;
-        const kElapsed = (now - kissStartTime) / 1000;
-
-        const scaleFactor = 0.35 + kElapsed * 1.35;
-        const globalAlpha = Math.max(0, 1 - kElapsed * 0.42);
-
-        ctx.save();
-        ctx.translate(width / 2, height * 0.44);
-
-        heartCloudParticles.forEach((p) => {
-          const px = p.targetX * scaleFactor;
-          const py = p.targetY * scaleFactor;
-          const a = p.alpha * globalAlpha;
-
-          if (a > 0.01) {
-            ctx.save();
-            ctx.globalAlpha = a;
-            ctx.fillStyle = p.color;
-            ctx.shadowColor = "#ff0044";
-            ctx.shadowBlur = 15;
-
-            ctx.beginPath();
-            ctx.arc(px, py, p.size * (0.85 + scaleFactor * 0.25), 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-          }
-        });
-
-        ctx.restore();
-      } else {
-        kissStartTime = 0;
       }
 
       animId = requestAnimationFrame(render);
@@ -340,7 +414,7 @@ function LoveParticleCanvas({
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", handleResize);
     };
-  }, [isFlying, isKissing]);
+  }, [isActive, onPlayKissSound, onShowBanner, onComplete]);
 
   return (
     <canvas
@@ -567,24 +641,6 @@ export default function Home() {
       setPhase("moonlight");
       setIsRabbitFlying(true);
       setShowBannerCard(false);
-      // Thỏ bay 1.5 vòng ~3.1s
-      flyTimerRef.current = setTimeout(() => {
-        // Thỏ phóng to & hun gió: Trái tim nở ra, phóng to dần và mờ dần
-        setIsRabbitFlying(false);
-        setIsRabbitKissing(true);
-        if (soundOn) playMidAutumnSound("kiss");
-
-        // Khi trái tim phóng to dần và mờ gần hết (~1.8s) thì hiện banner ra
-        setTimeout(() => {
-          setShowBannerCard(true);
-          if (soundOn) playMidAutumnSound("lantern");
-        }, 1800);
-
-        // Kết thúc stage hôn gió lúc 2.4s (khi trái tim mờ hết hoàn toàn)
-        setTimeout(() => {
-          setIsRabbitKissing(false);
-        }, 2400);
-      }, 3100);
     }, 1300);
   }, [phase, soundOn]);
 
@@ -749,7 +805,19 @@ export default function Home() {
         aria-hidden={phase !== "moonlight"}
       >
         {/* Canvas Engine Xử Lý Trái Tim Hạt Đỏ (Ảnh 2) & Đuôi Trái Tim Thỏ Bay (Ảnh 1) */}
-        <LoveParticleCanvas isFlying={isRabbitFlying} isKissing={isRabbitKissing} />
+        <LoveParticleCanvas
+          isActive={isRabbitFlying}
+          onPlayKissSound={() => {
+            if (soundOn) playMidAutumnSound("kiss");
+          }}
+          onShowBanner={() => {
+            setShowBannerCard(true);
+            if (soundOn) playMidAutumnSound("lantern");
+          }}
+          onComplete={() => {
+            setIsRabbitFlying(false);
+          }}
+        />
 
         {/* 1. MẶT TRĂNG RẰM KHỔNG LỒ (VÀNG RỰC RỠ, HÀO QUANG ÁM ÁP) */}
         <div className="full-moon-container" onClick={interactRabbit} title="Chạm vào trăng rằm">
@@ -765,23 +833,6 @@ export default function Home() {
           <div className="moon-cloud cloud-top" />
           <div className="moon-cloud cloud-bottom" />
         </div>
-
-        {/* Thỏ phóng to ra giữa màn hình + hun gió tạo ra TRÁI TIM HẠT ĐỎ LẤP LÁNH (Ảnh 2) phóng to dần và mờ dần */}
-        {isRabbitKissing && (
-          <div className="kiss-stage-wrapper" aria-hidden="true">
-            {/* Lớp phủ ánh sáng hồng bùng nổ */}
-            <div className="kiss-screen-flash" />
-
-            {/* Chú Thỏ Ngọc phóng to ra làm cử chỉ hun gió ở giữa màn hình */}
-            <div className="kiss-bunny-actor">
-              <span className="bunny-face face-ready">🐰</span>
-              <span className="bunny-face face-kiss">😚</span>
-              <span className="bunny-face face-happy">🥰</span>
-              {/* Trái tim bay ra từ miệng thỏ */}
-              <span className="kiss-fly-heart">💖</span>
-            </div>
-          </div>
-        )}
 
 
         {/* 2. CHÚ THỎ NGỌC TINH NGHỊCH (NGỒI TRÊN MÂY) */}
