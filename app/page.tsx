@@ -49,7 +49,7 @@ function seeded(index: number, salt: number) {
 }
 
 // Pentatonic Asian chime melody for Mid-Autumn
-function playMidAutumnSound(variant: "open" | "hop" | "lantern" = "open") {
+function playMidAutumnSound(variant: "open" | "hop" | "lantern" | "kiss" = "open") {
   try {
     const AudioContextClass =
       window.AudioContext ||
@@ -90,6 +90,23 @@ function playMidAutumnSound(variant: "open" | "hop" | "lantern" = "open") {
       return;
     }
 
+    if (variant === "kiss") {
+      // Nốt nhạc lãng mạn — E major arpeggio thượng thăng
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.11, ctx.currentTime + 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.8);
+      gain.connect(ctx.destination);
+      [659.25, 783.99, 987.77, 1174.66, 1318.51].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        osc.start(ctx.currentTime + i * 0.15);
+        osc.stop(ctx.currentTime + 1.7);
+      });
+      return;
+    }
+
     // Default opening chime: G4, A4, C5, D5, E5, G5 (Pentatonic melody)
     gain.gain.setValueAtTime(0.0001, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime + 0.04);
@@ -119,6 +136,7 @@ export default function Home() {
   const [activeWishIndex, setActiveWishIndex] = useState(0);
   const [showScrollNote, setShowScrollNote] = useState(true);
   const [isRabbitFlying, setIsRabbitFlying] = useState(false);
+  const [isRabbitKissing, setIsRabbitKissing] = useState(false);
   const [showBannerCard, setShowBannerCard] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -207,13 +225,20 @@ export default function Home() {
       setPhase("moonlight");
       setIsRabbitFlying(true);
       setShowBannerCard(false);
-      // Thỏ bay 1.5 vòng ~3s → hiện banner
+      // Thỏ bay 1.5 vòng ~3.1s
       flyTimerRef.current = setTimeout(() => {
+        // Orbit xong → Thỏ đến giữa màn hình hôn + hiện tim
         setIsRabbitFlying(false);
+        setIsRabbitKissing(true);
+        if (soundOn) playMidAutumnSound("kiss");
+        // Hôn trong 2s rồi thu về góc
         setTimeout(() => {
-          setShowBannerCard(true);
-          if (soundOn) playMidAutumnSound("lantern");
-        }, 260);
+          setIsRabbitKissing(false);
+          setTimeout(() => {
+            setShowBannerCard(true);
+            if (soundOn) playMidAutumnSound("lantern");
+          }, 280);
+        }, 2000);
       }, 3100);
     }, 1300);
   }, [phase, soundOn]);
@@ -224,6 +249,7 @@ export default function Home() {
     setPhase("intro");
     setExtraLanterns([]);
     setIsRabbitFlying(false);
+    setIsRabbitKissing(false);
     setShowBannerCard(false);
     setShowScrollNote(true);
   };
@@ -401,8 +427,63 @@ export default function Home() {
           </div>
         )}
 
+        {/* Th\u1ecf \u0111\u1ebfn gi\u1eefa m\u00e0n h\u00ecnh \u2014 ph\u00e9p thu\u1eadt WIN: tim b\u1eafn 12 h\u01b0\u1edbng, sao v\u1ee5t 8 h\u01b0\u1edbng, s\u00f3ng x\u00fac \u0111\u1ed9ng n\u1ed5 t\u1ee9a */}
+        {isRabbitKissing && (
+          <div className="kissing-center-stage" aria-hidden="true">
+            {/* Screen bloom flash */}
+            <div className="kiss-screen-flash" />
+            {/* 3 expanding shockwave rings */}
+            <div className="kiss-ring kr-1" />
+            <div className="kiss-ring kr-2" />
+            <div className="kiss-ring kr-3" />
+            {/* 8 sparkle stars radiating outward */}
+            {([
+              { e: '\u2728', sx: '-145px', sy: '-125px', d: '0.20s', s: '28px' },
+              { e: '\u2b50', sx: '18px',   sy: '-165px', d: '0.30s', s: '32px' },
+              { e: '\u2728', sx: '155px',  sy: '-105px', d: '0.24s', s: '26px' },
+              { e: '\u2b50', sx: '165px',  sy: '28px',   d: '0.38s', s: '30px' },
+              { e: '\u2728', sx: '105px',  sy: '145px',  d: '0.32s', s: '24px' },
+              { e: '\u2b50', sx: '-28px',  sy: '168px',  d: '0.44s', s: '28px' },
+              { e: '\u2728', sx: '-155px', sy: '105px',  d: '0.28s', s: '32px' },
+              { e: '\u2b50', sx: '-165px', sy: '-32px',  d: '0.36s', s: '26px' },
+            ] as const).map((sp, i) => (
+              <span
+                key={i}
+                className="kiss-sparkle"
+                style={{ fontSize: sp.s, animationDelay: sp.d, '--sx': sp.sx, '--sy': sp.sy } as React.CSSProperties}
+              >{sp.e}</span>
+            ))}
+            {/* Bunny + lips + 12 hearts bursting in ALL directions */}
+            <div className="kissing-rabbit">
+              <span className="kiss-bunny">\ud83d\udc30</span>
+              <span className="kiss-lips">\ud83d\ude18</span>
+              {([
+                { e: '\ud83d\udc95', tx: '-95px',  ty: '-115px', d: '0.22s', dur: '1.3s', s: '28px' },
+                { e: '\u2764\ufe0f', tx: '0px',    ty: '-148px', d: '0.30s', dur: '1.5s', s: '36px' },
+                { e: '\ud83d\udc96', tx: '95px',   ty: '-115px', d: '0.26s', dur: '1.2s', s: '26px' },
+                { e: '\ud83d\udc97', tx: '145px',  ty: '0px',    d: '0.40s', dur: '1.4s', s: '32px' },
+                { e: '\ud83d\udc9d', tx: '105px',  ty: '105px',  d: '0.34s', dur: '1.3s', s: '24px' },
+                { e: '\ud83d\udc98', tx: '0px',    ty: '145px',  d: '0.48s', dur: '1.5s', s: '30px' },
+                { e: '\ud83d\udc95', tx: '-105px', ty: '105px',  d: '0.36s', dur: '1.2s', s: '26px' },
+                { e: '\u2764\ufe0f', tx: '-145px', ty: '0px',    d: '0.42s', dur: '1.4s', s: '34px' },
+                { e: '\ud83d\udc96', tx: '-68px',  ty: '-136px', d: '0.24s', dur: '1.1s', s: '22px' },
+                { e: '\ud83d\udc97', tx: '68px',   ty: '-136px', d: '0.52s', dur: '1.3s', s: '28px' },
+                { e: '\ud83d\udc9d', tx: '136px',  ty: '-68px',  d: '0.28s', dur: '1.2s', s: '20px' },
+                { e: '\ud83d\udc98', tx: '-136px', ty: '-68px',  d: '0.46s', dur: '1.4s', s: '24px' },
+              ] as const).map((h, i) => (
+                <span
+                  key={i}
+                  className="kiss-heart"
+                  style={{ fontSize: h.s, animationDelay: h.d, animationDuration: h.dur, '--tx': h.tx, '--ty': h.ty } as React.CSSProperties}
+                >{h.e}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+
         {/* 2. CHÚ THỎ NGỌC TINH NGHỊCH (NGỒI TRÊN MÂY) */}
-        {!isRabbitFlying && (
+        {!isRabbitFlying && !isRabbitKissing && (
           <div
             className={`jade-rabbit-container ${rabbitHopCount > 0 ? "is-hopping" : ""}`}
             key={rabbitHopCount}

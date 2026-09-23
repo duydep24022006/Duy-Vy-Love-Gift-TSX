@@ -742,6 +742,98 @@ button {
   will-change: transform, opacity, filter;
 }
 
+/* ====== KISSING RABBIT CENTER STAGE ====== */
+.kissing-center-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 31;
+  pointer-events: none;
+}
+
+/* Pink/red bloom flash across the whole screen when kiss happens */
+.kiss-screen-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 80, 130, 0.22) 0%,
+    rgba(255, 40, 100, 0.10) 45%,
+    transparent 70%
+  );
+  animation: kissScreenFlash 2s ease-in-out forwards;
+  pointer-events: none;
+}
+
+.kissing-rabbit {
+  position: relative;
+  animation: kissingRabbitAnim 2s cubic-bezier(0.22, 0.68, 0.36, 1.1) forwards;
+}
+
+/* Big bunny emoji in center */
+.kiss-bunny {
+  display: block;
+  font-size: clamp(80px, 15vw, 120px);
+  filter:
+    drop-shadow(0 0 22px rgba(255, 225, 80, 1))
+    drop-shadow(0 0 50px rgba(255, 140, 0, 0.8));
+  line-height: 1;
+}
+
+/* Kiss lips — appears upper-right of bunny */
+.kiss-lips {
+  position: absolute;
+  font-size: clamp(40px, 7vw, 58px);
+  top: -18%;
+  right: -28%;
+  animation: kissLipsAnim 2s ease-in-out forwards;
+  transform: scale(0);
+  opacity: 0;
+}
+
+/* Floating hearts — burst outward using CSS custom properties */
+.kiss-heart {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  opacity: 0;
+  /* CSS vars --tx --ty set via inline style from JSX */
+  animation: kissHeartBurst ease-out forwards;
+}
+
+/* Sparkle stars — radiate outward */
+.kiss-sparkle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  opacity: 0;
+  /* CSS vars --sx --sy set via inline style from JSX */
+  animation: kissSparkleRay ease-out forwards;
+  animation-duration: 1.4s;
+}
+
+/* Shockwave rings */
+.kiss-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 80px;
+  height: 80px;
+  margin-left: -40px;
+  margin-top: -40px;
+  border-radius: 50%;
+  border: 4px solid;
+  opacity: 0;
+  animation: kissRingExpand ease-out forwards;
+}
+
+.kr-1 { border-color: rgba(255,  90, 160, 0.95); animation-delay: 0.12s; animation-duration: 1.0s; }
+.kr-2 { border-color: rgba(255, 215,  30, 0.90); animation-delay: 0.40s; animation-duration: 1.1s; }
+.kr-3 { border-color: rgba(180,  80, 255, 0.80); animation-delay: 0.72s; animation-duration: 1.2s; }
+
+
 /* 3. CƠN MƯA THIÊN ĐĂNG & ĐÈN ÔNG SAO BAY LÊN TRỜI */
 .lantern-sky-field {
   position: absolute;
@@ -1124,6 +1216,85 @@ button {
     filter: blur(0);
   }
 }
+
+/* ===== KISS ANIMATION KEYFRAMES ===== */
+
+/* Full-screen gold+pink victory bloom */
+@keyframes kissScreenFlash {
+  0%   { opacity: 0; }
+  10%  { opacity: 0; }
+  22%  { opacity: 1; }
+  50%  { opacity: 0.9; }
+  80%  { opacity: 0.45; }
+  100% { opacity: 0; }
+}
+
+/*
+  Kissing rabbit main animation (MAGIC WIN version):
+  - Pops in BIG from the tiny orbit-end
+  - Giant triumphant scale + wiggle dance
+  - Gradually floats up and shrinks away to reveal jade rabbit in corner
+*/
+@keyframes kissingRabbitAnim {
+  0%   { transform: scale(0.04) translateY(0); opacity: 0; filter: blur(14px); }
+  /* BOOM — appear huge */
+  10%  { transform: scale(1.55) translateY(0); opacity: 1; filter: blur(0); }
+  /* Victory dance wiggle */
+  20%  { transform: scale(1.25) rotate(-12deg) translateY(-8px); }
+  30%  { transform: scale(1.40) rotate(10deg)  translateY(-12px); }  /* BIG wiggle = kiss moment */
+  40%  { transform: scale(1.20) rotate(-7deg)  translateY(-8px); }
+  52%  { transform: scale(1.15) rotate(4deg)   translateY(-5px); }
+  62%  { transform: scale(1.10) rotate(0deg)   translateY(-3px); }
+  /* Float up toward corner */
+  74%  { transform: scale(0.72) translateY(-12vh); opacity: 1; }
+  87%  { transform: scale(0.35) translateY(-32vh); opacity: 0.6; }
+  100% { transform: scale(0.04) translateY(-55vh); opacity: 0; filter: blur(5px); }
+}
+
+/* Kiss lips: pop in at wiggle peak, hold, then fade */
+@keyframes kissLipsAnim {
+  0%,  10% { transform: scale(0) rotate(-20deg); opacity: 0; }
+  28%       { transform: scale(1.4) rotate(10deg);  opacity: 1; }
+  48%       { transform: scale(1.1) rotate(-6deg); opacity: 1; }
+  65%       { transform: scale(1.05) rotate(0deg); opacity: 1; }
+  82%       { transform: scale(0.7) rotate(5deg);  opacity: 0.5; }
+  100%      { transform: scale(0.1) rotate(12deg); opacity: 0; }
+}
+
+/* Hearts: burst outward using --tx --ty CSS variables (set via JSX inline style) */
+@keyframes kissHeartBurst {
+  0%   { transform: translate(-50%, -50%) translate(0, 0)                             scale(0);   opacity: 0; }
+  18%  { transform: translate(-50%, -50%) translate(calc(var(--tx) * 0.18), calc(var(--ty) * 0.18)) scale(1.4); opacity: 1; }
+  50%  { transform: translate(-50%, -50%) translate(calc(var(--tx) * 0.60), calc(var(--ty) * 0.60)) scale(1.1); opacity: 0.95; }
+  80%  { transform: translate(-50%, -50%) translate(calc(var(--tx) * 0.88), calc(var(--ty) * 0.88)) scale(0.7); opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) translate(var(--tx), var(--ty))             scale(0.1); opacity: 0; }
+}
+
+/* Sparkle stars: radiate outward using --sx --sy CSS variables */
+@keyframes kissSparkleRay {
+  0%   { transform: translate(-50%, -50%) translate(0, 0)                             scale(0)   rotate(0deg);   opacity: 0; }
+  20%  { transform: translate(-50%, -50%) translate(calc(var(--sx) * 0.2), calc(var(--sy) * 0.2)) scale(1.3)   rotate(120deg); opacity: 1; }
+  65%  { transform: translate(-50%, -50%) translate(calc(var(--sx) * 0.7), calc(var(--sy) * 0.7)) scale(0.85)  rotate(280deg); opacity: 0.75; }
+  100% { transform: translate(-50%, -50%) translate(var(--sx), var(--sy))             scale(0.1) rotate(400deg); opacity: 0; }
+}
+
+/* Shockwave ring: expand from small to huge */
+@keyframes kissRingExpand {
+  0%   { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
+  12%  { transform: translate(-50%, -50%) scale(0.3); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(7.5); opacity: 0; }
+}
+
+/* Hearts: burst up and fade out */
+@keyframes kissHeartFloat {
+  0%   { transform: translateY(0)    scale(0);   opacity: 0; }
+  18%  { transform: translateY(-12px) scale(1.25); opacity: 1; }
+  55%  { transform: translateY(-60px) scale(1.0);  opacity: 0.85; }
+  80%  { transform: translateY(-100px) scale(0.7); opacity: 0.4; }
+  100% { transform: translateY(-140px) scale(0.3); opacity: 0; }
+}
+
+
 
 /* ===== ORBIT KEYFRAMES: PIVOT + BUNNY WITH 3D NEAR/FAR SCALE ===== */
 /*
