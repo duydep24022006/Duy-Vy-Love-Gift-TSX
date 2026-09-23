@@ -2057,8 +2057,8 @@ button {
 
   /* Dây treo vừa phải: điểm chấm cách mép trên ~1 khoảng thoải mái */
   .banner-hanging-string {
-    top: -160px;
-    height: 160px;
+    top: -230px;
+    height: 230px;
   }
 
   .tag-season {
