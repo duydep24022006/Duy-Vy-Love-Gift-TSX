@@ -125,7 +125,7 @@ function playMidAutumnSound(variant: "open" | "hop" | "lantern" | "kiss" = "open
   }
 }
 
-// Canvas Hiệu Ứng Trái Tim Hạt Đỏ (Ảnh 2) & Vệt Đuôi Trái Tim Theo Đuôi Thỏ Bay (Ảnh 1)
+// Canvas Hiệu Ứng Trái Tim Hạt Đỏ (Ảnh 2) & Vệt Đuôi Trái Tim Theo Đuôi Thỏ Bay Rộng Màn Hình (Ảnh 1)
 function LoveParticleCanvas({
   isFlying,
   isKissing,
@@ -153,7 +153,7 @@ function LoveParticleCanvas({
     };
     window.addEventListener("resize", handleResize);
 
-    // Dynamic Trail Particles for Flying Bunny (Ảnh 1)
+    // Dynamic Trail Particles for Flying Bunny (Ảnh 1) - Tự mất sau ~0.7s - 1.0s
     const trailParticles: Array<{
       x: number;
       y: number;
@@ -162,9 +162,11 @@ function LoveParticleCanvas({
       vx: number;
       vy: number;
       char: string;
+      life: number;
+      maxLife: number;
     }> = [];
 
-    // 380 Glowing Red Particle Hearts for Image 2 Heart Cloud
+    // 420 Glowing Red Particle Hearts for Image 2 Heart Cloud
     const heartCloudParticles: Array<{
       targetX: number;
       targetY: number;
@@ -182,9 +184,10 @@ function LoveParticleCanvas({
       "#e91e63",
       "#ff0022",
       "#ff3366",
+      "#c2185b",
     ];
 
-    for (let i = 0; i < 380; i++) {
+    for (let i = 0; i < 420; i++) {
       const t = Math.random() * Math.PI * 2;
       const hx = 16 * Math.pow(Math.sin(t), 3);
       const hy = -(
@@ -195,12 +198,12 @@ function LoveParticleCanvas({
       );
 
       const fillFactor = Math.sqrt(Math.random());
-      const rScale = Math.min(width, height) * 0.015;
+      const rScale = Math.min(width, height) * 0.016;
 
       heartCloudParticles.push({
-        targetX: hx * fillFactor * rScale + (Math.random() - 0.5) * 14,
-        targetY: hy * fillFactor * rScale + (Math.random() - 0.5) * 14,
-        size: Math.random() * 5 + 2.5,
+        targetX: hx * fillFactor * rScale + (Math.random() - 0.5) * 16,
+        targetY: hy * fillFactor * rScale + (Math.random() - 0.5) * 16,
+        size: Math.random() * 5.5 + 2.5,
         color: heartColors[Math.floor(Math.random() * heartColors.length)],
         alpha: 0.85 + Math.random() * 0.15,
       });
@@ -212,47 +215,68 @@ function LoveParticleCanvas({
       const elapsed = (now - startTime) / 1000;
       ctx.clearRect(0, 0, width, height);
 
-      // 1. DYNAMIC HEART TAIL TRAILING BEHIND FLYING RABBIT (Ảnh 1)
+      // 1. DYNAMIC RABBIT FLYING ACROSS ENTIRE SCREEN + HEART TAIL (Ảnh 1)
       if (isFlying) {
+        // Orbit angle: 1.5 turns over 3.1s across WHOLE SCREEN
         const progress = Math.min(elapsed / 3.1, 1);
         const angle = progress * Math.PI * 3; // 1.5 turns
-        const rx = Math.min(width * 0.35, 220);
-        const ry = Math.min(height * 0.25, 140);
+        
+        // Wide radius covering almost full viewport width and height
+        const rx = width * 0.41;
+        const ry = height * 0.32;
         const cx = width / 2;
-        const cy = height * 0.42;
+        const cy = height * 0.44;
 
         const bx = cx + Math.cos(angle) * rx;
         const by = cy + Math.sin(angle) * ry;
 
+        // Depth perspective scale: 0.7x (far top) -> 1.55x (near bottom)
+        const scale = 0.7 + (Math.sin(angle) + 1) * 0.42;
+        const bunnyFontSize = Math.round(55 * scale);
+
+        // Draw Bunny Emoji flying across screen
+        ctx.save();
+        ctx.font = `${bunnyFontSize}px sans-serif`;
+        ctx.shadowColor = "#ffeb3b";
+        ctx.shadowBlur = 25;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("🐰", bx, by);
+        ctx.restore();
+
+        // Emit heart particles continuously from bunny position (vệt đuôi mất sau 0.7s-1s)
         const trailChars = ["❤️", "💖", "💕", "❣️"];
         for (let k = 0; k < 2; k++) {
           trailParticles.push({
-            x: bx + (Math.random() - 0.5) * 16,
-            y: by + (Math.random() - 0.5) * 16,
-            size: Math.random() * 14 + 14,
+            x: bx - Math.cos(angle) * 20 + (Math.random() - 0.5) * 16,
+            y: by - Math.sin(angle) * 20 + (Math.random() - 0.5) * 16,
+            size: (Math.random() * 10 + 14) * scale,
             alpha: 1,
-            vx: -Math.cos(angle) * 2 + (Math.random() - 0.5) * 1.5,
-            vy: -Math.sin(angle) * 2 + (Math.random() - 0.5) * 1.5,
+            vx: -Math.cos(angle) * 2.5 + (Math.random() - 0.5) * 1.5,
+            vy: -Math.sin(angle) * 2.5 + (Math.random() - 0.5) * 1.5,
             char: trailChars[Math.floor(Math.random() * trailChars.length)],
+            life: 0,
+            maxLife: 0.7 + Math.random() * 0.3, // Mất dần sau 0.7s - 1s
           });
         }
       }
 
-      // Render & update trail particles
+      // Render & update trail particles (fade out in ~0.7s - 1s)
       for (let i = trailParticles.length - 1; i >= 0; i--) {
         const p = trailParticles[i];
         p.x += p.vx;
         p.y += p.vy;
-        p.alpha -= 0.035;
-        p.size *= 0.96;
+        p.life += 0.016; // ~60fps step
+        p.alpha = Math.max(0, 1 - p.life / p.maxLife);
+        p.size *= 0.97;
 
-        if (p.alpha <= 0) {
+        if (p.alpha <= 0 || p.life >= p.maxLife) {
           trailParticles.splice(i, 1);
           continue;
         }
 
         ctx.save();
-        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.globalAlpha = p.alpha;
         ctx.shadowColor = "#ff004d";
         ctx.shadowBlur = 12;
         ctx.font = `${p.size}px sans-serif`;
@@ -260,7 +284,7 @@ function LoveParticleCanvas({
         ctx.restore();
       }
 
-      // 2. HIGH-DENSITY RED PARTICLE HEART EXPLOSION ON KISS (Ảnh 2 - NO TEXT)
+      // 2. HIGH-DENSITY RED PARTICLE HEART EXPLOSION ON KISS (Ảnh 2 - NO SVG, NO TEXT)
       if (isKissing) {
         if (!kissStartTime) kissStartTime = now;
         const kElapsed = (now - kissStartTime) / 1000;
@@ -281,10 +305,10 @@ function LoveParticleCanvas({
             ctx.globalAlpha = a;
             ctx.fillStyle = p.color;
             ctx.shadowColor = "#ff0044";
-            ctx.shadowBlur = 14;
+            ctx.shadowBlur = 15;
 
             ctx.beginPath();
-            ctx.arc(px, py, p.size * (0.8 + scaleFactor * 0.25), 0, Math.PI * 2);
+            ctx.arc(px, py, p.size * (0.85 + scaleFactor * 0.25), 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
           }
@@ -730,93 +754,13 @@ export default function Home() {
           <div className="moon-cloud cloud-bottom" />
         </div>
 
-        {/* Thỏ Ngọc bay vòng tròn 3D + Vệt đuôi trái tim đỏ nối dài phía sau (Ảnh 1) */}
-        {isRabbitFlying && (
-          <div className="orbit-center" aria-hidden="true">
-            <div className="orbit-pivot-ring">
-              <span className="orbit-bunny">🐰</span>
-              {/* Vệt đuôi trái tim đỏ nối dài phía sau chú thỏ như cái đuôi */}
-              <div className="bunny-heart-trail">
-                <span className="trail-heart th-1">❤️</span>
-                <span className="trail-heart th-2">💖</span>
-                <span className="trail-heart th-3">💕</span>
-                <span className="trail-heart th-4">❤️</span>
-                <span className="trail-heart th-5">💖</span>
-                <span className="trail-heart th-6">💕</span>
-                <span className="trail-heart th-7">❣️</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Thỏ phóng to ra giữa màn hình + hun gió tạo ra TRÁI TIM HẠT LẤP LÁNH (Ảnh 2) phóng to dần và mờ dần */}
+        {/* Thỏ phóng to ra giữa màn hình + hun gió tạo ra TRÁI TIM HẠT ĐỎ LẤP LÁNH (Ảnh 2) phóng to dần và mờ dần */}
         {isRabbitKissing && (
           <div className="kiss-stage-wrapper" aria-hidden="true">
             {/* Lớp phủ ánh sáng hồng bùng nổ */}
             <div className="kiss-screen-flash" />
 
-            {/* Trái tim tình yêu làm bằng chùm hạt trái tim đỏ (như Ảnh 2): Phóng to dần và mờ dần */}
-            <div className="kiss-expanding-heart-stage">
-              <div className="kiss-particle-heart-cloud">
-                <svg viewBox="0 0 120 110" className="heart-svg-glow">
-                  <defs>
-                    <linearGradient id="heartGradPink" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#ff5e98" />
-                      <stop offset="45%" stopColor="#ff1493" />
-                      <stop offset="100%" stopColor="#e6005c" />
-                    </linearGradient>
-                    <filter id="heartNeon" x="-40%" y="-40%" width="180%" height="180%">
-                      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur1" />
-                      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur2" />
-                      <feMerge>
-                        <feMergeNode in="blur2" />
-                        <feMergeNode in="blur1" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                  </defs>
-                  <path
-                    d="M 60,35 A 25,25 0 0,0 15,35 C 15,65 60,95 60,95 C 60,95 105,65 105,35 A 25,25 0 0,0 60,35 Z"
-                    fill="url(#heartGradPink)"
-                    filter="url(#heartNeon)"
-                  />
-                </svg>
-
-                {/* Các hạt trái tim lấp lánh nổ bung phủ kín hình trái tim (Ảnh 2) */}
-                {[
-                  { x: -45, y: -40, s: 20, d: '0.0s', e: '❤️' },
-                  { x: 45,  y: -40, s: 20, d: '0.05s', e: '❤️' },
-                  { x: 0,   y: -50, s: 22, d: '0.1s', e: '💖' },
-                  { x: -70, y: -20, s: 18, d: '0.12s', e: '❤️' },
-                  { x: 70,  y: -20, s: 18, d: '0.15s', e: '❤️' },
-                  { x: -80, y: 15,  s: 16, d: '0.18s', e: '💕' },
-                  { x: 80,  y: 15,  s: 16, d: '0.22s', e: '💕' },
-                  { x: -50, y: 50,  s: 18, d: '0.25s', e: '❤️' },
-                  { x: 50,  y: 50,  s: 18, d: '0.28s', e: '❤️' },
-                  { x: 0,   y: 75,  s: 22, d: '0.3s', e: '💖' },
-                  { x: -25, y: 10,  s: 16, d: '0.12s', e: '💗' },
-                  { x: 25,  y: 10,  s: 16, d: '0.16s', e: '💗' },
-                  { x: 0,   y: -15, s: 20, d: '0.2s', e: '💓' },
-                  { x: -30, y: -20, s: 18, d: '0.08s', e: '❣️' },
-                  { x: 30,  y: -20, s: 18, d: '0.14s', e: '❣️' },
-                ].map((p, idx) => (
-                  <span
-                    key={idx}
-                    className="heart-cloud-particle"
-                    style={{
-                      left: `calc(50% + ${p.x}px)`,
-                      top: `calc(50% + ${p.y}px)`,
-                      fontSize: `${p.s}px`,
-                      animationDelay: p.d,
-                    }}
-                  >
-                    {p.e}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Thỏ Ngọc phóng to ra và thực hiện cử chỉ hun gió */}
+            {/* Chú Thỏ Ngọc phóng to ra làm cử chỉ hun gió ở giữa màn hình */}
             <div className="kiss-bunny-actor">
               <span className="bunny-face face-ready">🐰</span>
               <span className="bunny-face face-kiss">😚</span>
