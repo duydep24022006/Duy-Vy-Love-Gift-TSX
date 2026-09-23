@@ -742,7 +742,7 @@ button {
   will-change: transform, opacity, filter;
 }
 
-/* ====== THỎ NGỌC PHÓNG TO & HUN GIÓ RA HÌNH TRÁI TIM ====== */
+/* ====== THỎ NGỌC PHÓNG TO & HUN GIÓ: TRÁI TIM PHÓNG TO DẦN VÀ MỜ DẦN ====== */
 .kiss-stage-wrapper {
   position: absolute;
   inset: 0;
@@ -756,300 +756,211 @@ button {
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    circle at 50% 40%,
-    rgba(255, 60, 140, 0.35) 0%,
-    rgba(255, 20, 100, 0.18) 40%,
-    transparent 72%
+    circle at 50% 45%,
+    rgba(255, 60, 140, 0.38) 0%,
+    rgba(255, 20, 100, 0.20) 45%,
+    transparent 75%
   );
-  animation: screenFlashLove 2.8s ease-in-out forwards;
+  animation: screenFlashLove 2.4s ease-in-out forwards;
 }
 
-/* Sóng xung kích hình tròn hồng mở rộng */
-.kiss-heart-wave {
+/* Sân khấu trái tim phóng to dần và mờ dần */
+.kiss-expanding-heart-stage {
   position: absolute;
   left: 50%;
-  top: 38%;
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  border: 3px solid rgba(255, 105, 180, 0.85);
-  box-shadow: 0 0 20px rgba(255, 20, 147, 0.6);
-  opacity: 0;
-  animation: heartWaveExpand 1.6s ease-out forwards;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  z-index: 38;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
-.hw-1 { animation-delay: 0.55s; }
-.hw-2 { animation-delay: 0.85s; border-color: rgba(255, 192, 203, 0.9); }
+.kiss-expanding-heart {
+  position: relative;
+  width: clamp(160px, 35vw, 240px);
+  height: clamp(150px, 33vw, 225px);
+  animation: heartExpandAndFadeOut 2.3s cubic-bezier(0.18, 0.75, 0.32, 1) forwards;
+  will-change: transform, opacity;
+}
 
-/* Thỏ Ngọc làm diễn viên chính: phóng to ra & làm cử chỉ hun gió */
-.kiss-bunny-performer {
+.heart-svg-glow {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter:
+    drop-shadow(0 0 25px rgba(255, 40, 120, 0.95))
+    drop-shadow(0 0 60px rgba(255, 0, 80, 0.8));
+}
+
+/* Vòng trái tim nhỏ bay bổng quanh trái tim chính */
+.orbiting-mini-heart {
+  position: absolute;
+  font-size: clamp(24px, 5vw, 32px);
+  filter: drop-shadow(0 0 12px rgba(255, 80, 150, 0.9));
+  animation: miniHeartPulse 2.3s ease-out forwards;
+}
+
+.omh-1 { top: -15px; left: 15%; animation-delay: 0.1s; }
+.omh-2 { top: -15px; right: 15%; animation-delay: 0.2s; }
+.omh-3 { bottom: 20px; left: -20px; animation-delay: 0.3s; }
+.omh-4 { bottom: 20px; right: -20px; animation-delay: 0.4s; }
+
+/* Thỏ Ngọc làm cử chỉ hun gió */
+.kiss-bunny-actor {
   position: absolute;
   left: 50%;
-  top: 64%;
+  top: 68%;
   transform: translate(-50%, -50%);
   z-index: 40;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  animation: bunnyBlowKissRoutine 2.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-}
-
-.bunny-actor {
-  position: relative;
-  width: clamp(85px, 17vw, 115px);
-  height: clamp(85px, 17vw, 115px);
+  width: clamp(90px, 18vw, 120px);
+  height: clamp(90px, 18vw, 120px);
   display: flex;
   align-items: center;
   justify-content: center;
   filter:
     drop-shadow(0 0 22px rgba(255, 220, 80, 0.95))
     drop-shadow(0 0 50px rgba(255, 120, 0, 0.75));
+  animation: bunnyKissAction 2.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }
 
-.bunny-face {
+.kiss-bunny-actor .bunny-face {
   position: absolute;
-  font-size: clamp(75px, 15vw, 105px);
+  font-size: clamp(80px, 16vw, 110px);
   line-height: 1;
   user-select: none;
 }
 
-.face-ready {
-  animation: faceReadySwitch 2.8s forwards;
+.kiss-bunny-actor .face-ready {
+  animation: faceReadySwitch 2.4s forwards;
 }
 
-.face-kiss {
-  animation: faceKissSwitch 2.8s forwards;
+.kiss-bunny-actor .face-kiss {
+  animation: faceKissSwitch 2.4s forwards;
 }
 
-.face-happy {
-  animation: faceHappySwitch 2.8s forwards;
+.kiss-bunny-actor .face-happy {
+  animation: faceHappySwitch 2.4s forwards;
 }
 
-.bunny-paws {
-  font-size: 26px;
-  margin-top: -8px;
-  opacity: 0.85;
-  filter: drop-shadow(0 0 10px rgba(255, 200, 150, 0.8));
-}
-
-/* Nụ hôn gió: Trái tim phát sáng bay vút từ miệng thỏ lên bầu trời */
-.blown-heart-projectile {
+/* Nụ hôn gió: Trái tim bay ra từ miệng thỏ lên giữa màn hình */
+.kiss-fly-heart {
   position: absolute;
-  left: 50%;
-  top: 60%;
-  z-index: 42;
-  animation: blownHeartFly 0.45s 0.32s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  font-size: 38px;
   opacity: 0;
-  pointer-events: none;
+  filter: drop-shadow(0 0 16px rgba(255, 40, 120, 1));
+  animation: kissFlyHeartUp 0.5s 0.28s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
 }
 
-.blown-spark-heart {
-  display: block;
-  font-size: clamp(40px, 8vw, 55px);
-  filter:
-    drop-shadow(0 0 20px rgba(255, 50, 120, 1))
-    drop-shadow(0 0 45px rgba(255, 0, 80, 0.85));
-}
-
-.blown-trail-1, .blown-trail-2 {
-  position: absolute;
-  font-size: 22px;
-  opacity: 0.7;
-}
-.blown-trail-1 { top: 18px; left: -14px; }
-.blown-trail-2 { top: 28px; left: 14px; }
-
-/* Trái tim khổng lồ phát sáng nở bừng ở giữa bầu trời */
-.kiss-giant-center-heart {
-  position: absolute;
-  left: 50%;
-  top: 36%;
-  transform: translate(-50%, -50%);
-  z-index: 38;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  animation: giantCenterHeartBloom 2.8s cubic-bezier(0.2, 0.85, 0.35, 1) forwards;
-  opacity: 0;
-}
-
-.giant-heart-symbol {
-  display: block;
-  font-size: clamp(80px, 16vw, 115px);
-  line-height: 1;
-  filter:
-    drop-shadow(0 0 25px rgba(255, 50, 130, 1))
-    drop-shadow(0 0 65px rgba(255, 0, 90, 0.85));
-}
-
-.giant-heart-tag {
-  margin-top: 6px;
-  padding: 4px 16px;
-  border-radius: 999px;
-  background: rgba(18, 8, 25, 0.75);
-  border: 1.5px solid rgba(255, 215, 0, 0.9);
-  box-shadow: 0 0 16px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(255, 105, 180, 0.3);
-  font-size: clamp(0.85rem, 3.2vw, 1.05rem);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #fff;
-  text-shadow: 0 0 10px rgba(255, 220, 100, 0.9);
-  white-space: nowrap;
-}
-
-/* Chùm 16 trái tim xếp thành hình trái tim hoàn mỹ */
-.kiss-heart-constellation {
-  position: absolute;
-  left: 50%;
-  top: 36%;
-  transform: translate(-50%, -50%);
-  z-index: 37;
-  pointer-events: none;
-}
-
-.heart-shape-node {
-  position: absolute;
-  left: 0;
-  top: 0;
-  opacity: 0;
-  user-select: none;
-  filter:
-    drop-shadow(0 0 12px rgba(255, 80, 150, 0.9))
-    drop-shadow(0 0 26px rgba(255, 0, 80, 0.6));
-  animation: heartShapeBurst 2.8s cubic-bezier(0.2, 0.85, 0.35, 1.1) forwards;
-}
-
-/* KEYFRAMES FOR BLOWING KISS & HEART SHAPE */
-@keyframes bunnyBlowKissRoutine {
+/* KEYFRAMES */
+@keyframes heartExpandAndFadeOut {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.2) rotate(-12deg);
+    transform: scale(0.2) rotate(-8deg);
   }
-  16% {
+  20% {
+    /* Trái tim nở to rõ nét từ nụ hôn */
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1.6) rotate(0deg);
+    transform: scale(1.0) rotate(0deg);
   }
-  24% {
-    /* Thỏ rướn người chu môi hun gió */
-    transform: translate(-50%, -56%) scale(1.68) rotate(4deg);
-  }
-  38% {
-    /* Thổi nụ hôn gió ra */
-    transform: translate(-50%, -62%) scale(1.72) rotate(-3deg);
+  35% {
+    /* Đập nhịp tình yêu */
+    transform: scale(1.18) rotate(2deg);
+    opacity: 1;
   }
   50% {
-    /* Nhún người vui sướng ngắm trái tim */
-    transform: translate(-50%, -46%) scale(1.5) rotate(2deg);
+    /* Bắt đầu phóng to dần và mờ dần */
+    transform: scale(1.5) rotate(0deg);
+    opacity: 0.88;
   }
   75% {
-    opacity: 1;
-    transform: translate(-50%, -46%) scale(1.45) rotate(0deg);
+    /* Phóng to hơn nữa, mờ dần đi */
+    transform: scale(2.3) rotate(-1deg);
+    opacity: 0.42;
   }
-  88% {
-    opacity: 0.7;
-    transform: translate(-110%, -110%) scale(0.8) rotate(15deg);
+  90% {
+    /* Mờ gần hết - lúc này banner thiệp hiện ra */
+    transform: scale(2.9) rotate(0deg);
+    opacity: 0.12;
+  }
+  100% {
+    /* Mờ hẳn */
+    transform: scale(3.5) rotate(0deg);
+    opacity: 0;
+  }
+}
+
+@keyframes miniHeartPulse {
+  0% { opacity: 0; transform: scale(0.2); }
+  25% { opacity: 1; transform: scale(1.2); }
+  60% { opacity: 0.7; transform: scale(1.5); }
+  100% { opacity: 0; transform: scale(2.2); }
+}
+
+@keyframes bunnyKissAction {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2) rotate(-10deg);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.55) rotate(0deg);
+  }
+  28% {
+    /* Thỏ rướn người chu môi hun gió */
+    transform: translate(-50%, -58%) scale(1.62) rotate(3deg);
+  }
+  42% {
+    /* Thổi nụ hôn gió bay lên */
+    transform: translate(-50%, -64%) scale(1.68) rotate(-2deg);
+  }
+  56% {
+    /* Nhún người vui sướng ngắm trái tim */
+    transform: translate(-50%, -48%) scale(1.48) rotate(2deg);
+  }
+  78% {
+    opacity: 1;
+    transform: translate(-50%, -48%) scale(1.42) rotate(0deg);
+  }
+  90% {
+    opacity: 0.65;
+    transform: translate(-120%, -120%) scale(0.8) rotate(15deg);
   }
   100% {
     opacity: 0;
-    transform: translate(-170%, -170%) scale(0.3) rotate(30deg);
+    transform: translate(-180%, -180%) scale(0.3) rotate(30deg);
   }
 }
 
 @keyframes faceReadySwitch {
-  0%, 20% { opacity: 1; }
-  22%, 100% { opacity: 0; }
+  0%, 22% { opacity: 1; }
+  24%, 100% { opacity: 0; }
 }
 
 @keyframes faceKissSwitch {
-  0%, 21% { opacity: 0; }
-  22%, 42% { opacity: 1; }
-  44%, 100% { opacity: 0; }
+  0%, 23% { opacity: 0; }
+  24%, 44% { opacity: 1; }
+  46%, 100% { opacity: 0; }
 }
 
 @keyframes faceHappySwitch {
-  0%, 43% { opacity: 0; }
-  44%, 100% { opacity: 1; }
+  0%, 45% { opacity: 0; }
+  46%, 100% { opacity: 1; }
 }
 
-@keyframes blownHeartFly {
+@keyframes kissFlyHeartUp {
   0% {
     opacity: 0;
-    transform: translate(-50%, 0) scale(0.25) rotate(-20deg);
+    transform: translate(0, 0) scale(0.3);
   }
-  25% {
+  40% {
     opacity: 1;
-    transform: translate(-50%, -50px) scale(0.85) rotate(8deg);
-  }
-  80% {
-    opacity: 1;
-    transform: translate(-50%, -135px) scale(1.2) rotate(22deg);
+    transform: translate(0, -60px) scale(1.1);
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -160px) scale(1.7) rotate(32deg);
-  }
-}
-
-@keyframes giantCenterHeartBloom {
-  0%, 22% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0);
-  }
-  30% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.35);
-  }
-  42% {
-    transform: translate(-50%, -50%) scale(0.96);
-  }
-  54% {
-    transform: translate(-50%, -50%) scale(1.22);
-  }
-  66% {
-    transform: translate(-50%, -50%) scale(1.02);
-  }
-  80% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.06);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.3) translateY(-40px);
-  }
-}
-
-@keyframes heartShapeBurst {
-  0%, 22% {
-    opacity: 0;
-    transform: translate(-50%, -50%) translate(0, 0) scale(0.1);
-  }
-  36% {
-    opacity: 1;
-    transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(1.28);
-  }
-  60% {
-    opacity: 1;
-    transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(1.0);
-  }
-  82% {
-    opacity: 0.95;
-    transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(1.05);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) translate(var(--tx), calc(var(--ty) - 25px)) scale(0.4);
-  }
-}
-
-@keyframes heartWaveExpand {
-  0% {
-    transform: translate(-50%, -50%) scale(0.1);
-    opacity: 0.9;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(3.5);
-    opacity: 0;
+    transform: translate(0, -140px) scale(1.6);
   }
 }
 
@@ -1061,13 +972,13 @@ button {
 }
 
 
-/* 3. CƠN MƯA THIÊN ĐĂNG & ĐÈN ÔNG SAO BAY LÊN TRỜI */
+/* 3. CƠN MƯA THIÊN ĐĂNG & ĐÈN ÔNG SAO (CÓ THỂ CẦM KÉO DI CHUYỂN THEO TAY/CHUỘT) */
 .lantern-sky-field {
   position: absolute;
   inset: 0;
   pointer-events: none;
   overflow: hidden;
-  z-index: 4;
+  z-index: 5;
 }
 
 .floating-lantern-item {
@@ -1075,6 +986,39 @@ button {
   bottom: -90px;
   animation: lanternFloatUp linear infinite;
   will-change: transform;
+  pointer-events: auto;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: none;
+}
+
+.floating-lantern-item.is-held {
+  cursor: grabbing !important;
+  transform: scale(1.22) !important;
+  filter: drop-shadow(0 0 30px rgba(255, 200, 50, 1)) !important;
+  z-index: 9999 !important;
+  transition: transform 0.12s ease;
+}
+
+.lantern-drag-halo {
+  position: absolute;
+  inset: -15px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.45) 0%, transparent 70%);
+  animation: pulseGlow 1s infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes lanternFloatFromCurrent {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-120vh) rotate(6deg);
+    opacity: 0.05;
+  }
 }
 
 .extra-lantern {

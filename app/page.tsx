@@ -125,6 +125,118 @@ function playMidAutumnSound(variant: "open" | "hop" | "lantern" | "kiss" = "open
   }
 }
 
+// Chiếc lồng đèn có thể cầm chuột hoặc ngón tay để kéo đi khắp màn hình
+function DraggableLantern({
+  type,
+  size,
+  initialLeft,
+  duration,
+  delay = 0,
+  text,
+}: {
+  id?: number | string;
+  type: "sky" | "star";
+  size: number;
+  initialLeft: number;
+  duration: number;
+  delay?: number;
+  text?: string;
+}) {
+  const [isHeld, setIsHeld] = useState(false);
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const elRef = useRef<HTMLDivElement>(null);
+  const grabOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+    const el = elRef.current;
+    if (!el) return;
+    e.stopPropagation();
+    e.preventDefault();
+
+    const rect = el.getBoundingClientRect();
+    grabOffset.current = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
+    setPos({ x: rect.left, y: rect.top });
+    setIsHeld(true);
+    el.setPointerCapture(e.pointerId);
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isHeld) return;
+    setPos({
+      x: e.clientX - grabOffset.current.x,
+      y: e.clientY - grabOffset.current.y,
+    });
+  };
+
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isHeld) return;
+    setIsHeld(false);
+    try {
+      elRef.current?.releasePointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  return (
+    <div
+      ref={elRef}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+      className={`floating-lantern-item lantern-${type} ${isHeld ? "is-held" : ""}`}
+      style={
+        isHeld && pos
+          ? {
+              position: "fixed",
+              left: `${pos.x}px`,
+              top: `${pos.y}px`,
+              bottom: "auto",
+              animation: "none",
+              zIndex: 999,
+              cursor: "grabbing",
+              touchAction: "none",
+            }
+          : pos
+          ? {
+              position: "fixed",
+              left: `${pos.x}px`,
+              top: `${pos.y}px`,
+              bottom: "auto",
+              animation: `lanternFloatFromCurrent ${duration * 0.75}s linear infinite`,
+              zIndex: 8,
+              cursor: "grab",
+              touchAction: "none",
+            }
+          : {
+              left: `${initialLeft}%`,
+              animationDuration: `${duration}s`,
+              animationDelay: `${delay}s`,
+              cursor: "grab",
+              touchAction: "none",
+            }
+      }
+      title="Chạm hoặc kéo lồng đèn để di chuyển theo tay / chuột"
+    >
+      {type === "sky" ? (
+        <div className="sky-lantern-box" style={{ width: size, height: size * 1.3 }}>
+          <span className="lantern-flame" />
+          <span className="lantern-text">{text || "Vy ♥"}</span>
+          {isHeld && <span className="lantern-drag-halo" />}
+        </div>
+      ) : (
+        <div className="star-lantern-shape" style={{ fontSize: `${size}px` }}>
+          🏮
+          {isHeld && <span className="lantern-drag-halo" />}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const [phase, setPhase] = useState<Phase>("intro");
   const [soundOn, setSoundOn] = useState(true);
@@ -227,18 +339,21 @@ export default function Home() {
       setShowBannerCard(false);
       // Thỏ bay 1.5 vòng ~3.1s
       flyTimerRef.current = setTimeout(() => {
-        // Orbit xong → Thỏ đến giữa màn hình hôn + hiện tim
+        // Thỏ phóng to & hun gió: Trái tim nở ra, phóng to dần và mờ dần
         setIsRabbitFlying(false);
         setIsRabbitKissing(true);
         if (soundOn) playMidAutumnSound("kiss");
-        // Hôn gió trong 2.8s rồi thu về góc
+
+        // Khi trái tim phóng to dần và mờ gần hết (~1.8s) thì hiện banner ra
+        setTimeout(() => {
+          setShowBannerCard(true);
+          if (soundOn) playMidAutumnSound("lantern");
+        }, 1800);
+
+        // Kết thúc stage hôn gió lúc 2.4s (khi trái tim mờ hết hoàn toàn)
         setTimeout(() => {
           setIsRabbitKissing(false);
-          setTimeout(() => {
-            setShowBannerCard(true);
-            if (soundOn) playMidAutumnSound("lantern");
-          }, 350);
-        }, 2800);
+        }, 2400);
       }, 3100);
     }, 1300);
   }, [phase, soundOn]);
@@ -427,72 +542,66 @@ export default function Home() {
           </div>
         )}
 
-        {/* Thỏ phóng to ra giữa màn hình + hun gió tạo thành hình trái tim khổng lồ */}
+        {/* Thỏ phóng to ra giữa màn hình + hun gió tạo ra trái tim phóng to dần và mờ dần */}
         {isRabbitKissing && (
           <div className="kiss-stage-wrapper" aria-hidden="true">
             {/* Lớp phủ ánh sáng hồng bùng nổ */}
             <div className="kiss-screen-flash" />
 
-            {/* Vòng sóng xung kích trái tim tỏa ra */}
-            <div className="kiss-heart-wave hw-1" />
-            <div className="kiss-heart-wave hw-2" />
+            {/* Trái tim tình yêu: Phóng to dần và mờ dần */}
+            <div className="kiss-expanding-heart-stage">
+              <div className="kiss-expanding-heart">
+                <svg viewBox="0 0 120 110" className="heart-svg-glow">
+                  <defs>
+                    <linearGradient id="heartGradPink" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#ff5e98" />
+                      <stop offset="45%" stopColor="#ff1493" />
+                      <stop offset="100%" stopColor="#e6005c" />
+                    </linearGradient>
+                    <filter id="heartNeon" x="-40%" y="-40%" width="180%" height="180%">
+                      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur1" />
+                      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur2" />
+                      <feMerge>
+                        <feMergeNode in="blur2" />
+                        <feMergeNode in="blur1" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  <path
+                    d="M 60,35 A 25,25 0 0,0 15,35 C 15,65 60,95 60,95 C 60,95 105,65 105,35 A 25,25 0 0,0 60,35 Z"
+                    fill="url(#heartGradPink)"
+                    filter="url(#heartNeon)"
+                  />
+                  <text
+                    x="60"
+                    y="55"
+                    textAnchor="middle"
+                    fill="#ffffff"
+                    fontSize="9.5"
+                    fontWeight="bold"
+                    letterSpacing="0.8"
+                    style={{ textShadow: "0 0 8px rgba(255,255,255,0.95)" }}
+                  >
+                    Duy ♥ Vy
+                  </text>
+                </svg>
 
-            {/* Chùm 16 trái tim nở bùng xếp thành HÌNH TRÁI TIM KHỔNG LỒ */}
-            <div className="kiss-heart-constellation">
-              {([
-                { e: '❤️', x: '0px',    y: '-65px',  d: '0.36s', s: '30px' },
-                { e: '💖', x: '45px',   y: '-110px', d: '0.40s', s: '34px' },
-                { e: '💕', x: '95px',   y: '-120px', d: '0.44s', s: '32px' },
-                { e: '💗', x: '140px',  y: '-80px',  d: '0.48s', s: '34px' },
-                { e: '💓', x: '155px',  y: '-25px',  d: '0.52s', s: '36px' },
-                { e: '💘', x: '135px',  y: '30px',   d: '0.56s', s: '32px' },
-                { e: '💝', x: '90px',   y: '80px',   d: '0.60s', s: '34px' },
-                { e: '💞', x: '45px',   y: '120px',  d: '0.64s', s: '30px' },
-                { e: '❤️', x: '0px',    y: '155px',  d: '0.68s', s: '38px' }, // Đáy nhọn trái tim
-                { e: '💞', x: '-45px',  y: '120px',  d: '0.64s', s: '30px' },
-                { e: '💝', x: '-90px',  y: '80px',   d: '0.60s', s: '34px' },
-                { e: '💘', x: '-135px', y: '30px',   d: '0.56s', s: '32px' },
-                { e: '💓', x: '-155px', y: '-25px',  d: '0.52s', s: '36px' },
-                { e: '💗', x: '-140px', y: '-80px',  d: '0.48s', s: '34px' },
-                { e: '💕', x: '-95px',  y: '-120px', d: '0.44s', s: '32px' },
-                { e: '💖', x: '-45px',  y: '-110px', d: '0.40s', s: '34px' },
-              ] as const).map((h, i) => (
-                <span
-                  key={i}
-                  className="heart-shape-node"
-                  style={{
-                    fontSize: h.s,
-                    animationDelay: h.d,
-                    '--tx': h.x,
-                    '--ty': h.y,
-                  } as React.CSSProperties}
-                >
-                  {h.e}
-                </span>
-              ))}
-            </div>
-
-            {/* Trái tim khổng lồ phát sáng rực rỡ ở chính giữa bung ra từ nụ hôn gió */}
-            <div className="kiss-giant-center-heart">
-              <span className="giant-heart-symbol">💖</span>
-              <div className="giant-heart-tag">Duy ♥ Vy</div>
-            </div>
-
-            {/* Trái tim phát sáng bay vút ra từ miệng thỏ khi hun gió */}
-            <div className="blown-heart-projectile">
-              <span className="blown-spark-heart">💖</span>
-              <span className="blown-trail-1">💕</span>
-              <span className="blown-trail-2">💗</span>
-            </div>
-
-            {/* Chú Thỏ Ngọc phóng to ra làm hoạt ảnh hun gió */}
-            <div className="kiss-bunny-performer">
-              <div className="bunny-actor">
-                <span className="bunny-face face-ready">🐰</span>
-                <span className="bunny-face face-kiss">😚</span>
-                <span className="bunny-face face-happy">🥰</span>
+                {/* Vòng trái tim nhỏ bay bổng quanh trái tim chính */}
+                <span className="orbiting-mini-heart omh-1">💖</span>
+                <span className="orbiting-mini-heart omh-2">💕</span>
+                <span className="orbiting-mini-heart omh-3">💗</span>
+                <span className="orbiting-mini-heart omh-4">💓</span>
               </div>
-              <div className="bunny-paws">🐾</div>
+            </div>
+
+            {/* Thỏ Ngọc phóng to ra và thực hiện cử chỉ hun gió */}
+            <div className="kiss-bunny-actor">
+              <span className="bunny-face face-ready">🐰</span>
+              <span className="bunny-face face-kiss">😚</span>
+              <span className="bunny-face face-happy">🥰</span>
+              {/* Trái tim bay ra từ miệng thỏ */}
+              <span className="kiss-fly-heart">💖</span>
             </div>
           </div>
         )}
@@ -539,46 +648,32 @@ export default function Home() {
           </div>
         )}
 
-        {/* 3. CƠN MƯA THIÊN ĐĂNG & ĐÈN ÔNG SAO BAY LÊN */}
-        <div className="lantern-sky-field" aria-hidden="true">
+        {/* 3. CƠN MƯA THIÊN ĐĂNG & ĐÈN ÔNG SAO BAY LÊN (CẦM KÉO DI CHUYỂN THEO TAY/CHUỘT) */}
+        <div className="lantern-sky-field">
           {defaultLanterns.map((l) => (
-            <div
+            <DraggableLantern
               key={l.id}
-              className={`floating-lantern-item lantern-${l.type}`}
-              style={{
-                left: `${l.left}%`,
-                animationDuration: `${l.duration}s`,
-                animationDelay: `${l.delay}s`,
-              }}
-            >
-              {l.type === "sky" ? (
-                <div className="sky-lantern-box" style={{ width: l.size, height: l.size * 1.3 }}>
-                  <span className="lantern-flame" />
-                  <span className="lantern-text">Vy ♥</span>
-                </div>
-              ) : (
-                <div className="star-lantern-shape" style={{ fontSize: `${l.size}px` }}>
-                  🏮
-                </div>
-              )}
-            </div>
+              id={l.id}
+              type={l.type}
+              size={l.size}
+              initialLeft={l.left}
+              duration={l.duration}
+              delay={l.delay}
+              text="Vy ♥"
+            />
           ))}
 
           {/* Extra lanterns thả thủ công khi người dùng bấm */}
           {extraLanterns.map((l) => (
-            <div
+            <DraggableLantern
               key={l.id}
-              className={`floating-lantern-item extra-lantern lantern-${l.type}`}
-              style={{
-                left: `${l.x}%`,
-                animationDuration: `${l.speed}s`,
-              }}
-            >
-              <div className="sky-lantern-box" style={{ width: l.size, height: l.size * 1.3 }}>
-                <span className="lantern-flame" />
-                <span className="lantern-text">Duy ♥ Vy</span>
-              </div>
-            </div>
+              id={l.id}
+              type={l.type}
+              size={l.size}
+              initialLeft={l.x}
+              duration={l.speed}
+              text="Duy ♥ Vy"
+            />
           ))}
         </div>
 
