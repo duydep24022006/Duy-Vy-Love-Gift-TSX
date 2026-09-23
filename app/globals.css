@@ -1476,46 +1476,78 @@ button {
   background: rgba(255, 255, 255, 0.22);
 }
 
-/* Nút mở lại khi đã ẩn */
-.btn-reopen-scroll {
+/* ================= BOTTOM DOCK BAR & REOPEN BUTTON (CĂN GIỮA HÀNG) ================= */
+.bottom-dock-bar {
   position: absolute;
-  z-index: 20;
-  left: 50%;
-  bottom: max(24px, env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-  padding: 11px 24px;
+  z-index: 25;
+  left: 0;
+  right: 0;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  padding: 0 max(16px, env(safe-area-inset-left)) 0 max(16px, env(safe-area-inset-right));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.bottom-dock-bar > * {
+  pointer-events: auto;
+}
+
+.dock-center-slot {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 10px;
+  pointer-events: none;
+}
+
+/* Nút mở lại thiệp chúc - Nằm chuẩn xác ở GIỮA HÀNG điều khiển */
+.btn-reopen-scroll {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 20px;
   border-radius: 999px;
-  background: rgba(24, 12, 45, 0.88);
-  border: 1px solid rgba(255, 215, 0, 0.45);
+  background: linear-gradient(135deg, rgba(35, 18, 65, 0.92), rgba(20, 10, 40, 0.95));
+  border: 1.5px solid rgba(255, 215, 0, 0.65);
   color: #ffe082;
   font-weight: 600;
-  font-size: 0.88rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  font-size: 0.85rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 16px rgba(255, 215, 0, 0.3);
   cursor: pointer;
-  transition: .25s ease;
-  backdrop-filter: blur(12px);
-  animation: fadeUp .5s both;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(14px);
+  white-space: nowrap;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  animation: reopenFadeIn 0.35s ease-out both;
+}
+
+@keyframes reopenFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .btn-reopen-scroll:hover {
-  transform: translate(-50%, -2px);
+  transform: scale(1.04);
   border-color: #ffd54f;
-  background: rgba(45, 20, 85, 0.95);
+  background: linear-gradient(135deg, rgba(55, 25, 100, 0.96), rgba(30, 15, 60, 0.98));
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6), 0 0 22px rgba(255, 215, 0, 0.45);
 }
 
-/* ================= CONTROLS ================= */
-.controls {
-  position: absolute;
-  z-index: 25;
-  right: max(18px, env(safe-area-inset-right));
-  bottom: max(18px, env(safe-area-inset-bottom));
-  display: flex;
-  gap: 8px;
-}
-
-.controls button {
+.dock-ctrl-btn {
   display: flex;
   min-width: 42px;
   height: 42px;
@@ -1526,19 +1558,22 @@ button {
   border: 1px solid rgba(255, 215, 0, 0.25);
   border-radius: 999px;
   color: rgba(255, 240, 200, 0.85);
-  background: rgba(18, 10, 35, 0.7);
+  background: rgba(18, 10, 35, 0.75);
   backdrop-filter: blur(12px);
   cursor: pointer;
-  transition: .25s ease;
+  transition: 0.25s ease;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  font-size: 0.82rem;
+  flex-shrink: 0;
 }
 
-.controls button:last-child {
+.dock-sound-btn {
   padding: 0;
+  width: 42px;
 }
 
-.controls button:hover {
+.dock-ctrl-btn:hover {
   color: white;
   border-color: #ffd54f;
   background: rgba(255, 179, 0, 0.2);
@@ -1974,15 +2009,55 @@ button {
     padding: 1px 7px;
   }
 
-  /* Floating Ribbon Card centered nicely above bottom control bar */
+  /* Floating Ribbon Card — cách đáy ~2cm (phù hợp iPhone 14 Pro Max) */
   .moon-ribbon-scroll {
     left: 50%;
-    transform: translateX(-50%);
+    /* Dùng bottom thay top để neo sát đáy màn hình, cách ~75px = ~2cm */
+    top: auto !important;
+    bottom: max(78px, calc(env(safe-area-inset-bottom) + 66px));
+    transform: translateX(-50%) !important;
     width: calc(100vw - 28px);
     max-width: 440px;
-    bottom: max(68px, calc(env(safe-area-inset-bottom) + 58px));
     padding: 15px 14px 13px;
     border-radius: 20px;
+  }
+
+  /* Override animation để phù hợp với bottom-anchored (không cần dịch Y) */
+  .moon-ribbon-scroll.hanging-banner-drop {
+    animation:
+      bannerDropMobile 1.1s cubic-bezier(0.175, 0.885, 0.32, 1.22) forwards,
+      bannerDangleMobile 4.2s 1.1s ease-in-out infinite alternate;
+  }
+
+  @keyframes bannerDropMobile {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(80px);
+    }
+    65% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-12px) rotate(3deg);
+    }
+    82% {
+      transform: translateX(-50%) translateY(6px) rotate(-2deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) rotate(0deg);
+    }
+  }
+
+  @keyframes bannerDangleMobile {
+    0% { transform: translateX(-50%) rotate(0deg); }
+    25% { transform: translateX(-50%) rotate(2.5deg); }
+    75% { transform: translateX(-50%) rotate(-2.5deg); }
+    100% { transform: translateX(-50%) rotate(0deg); }
+  }
+
+  /* Dây treo dài hơn trên mobile để kéo dài đẹp từ đỉnh xuống */
+  .banner-hanging-string {
+    top: -300px;
+    height: 300px;
   }
 
   .tag-season {
@@ -2024,34 +2099,31 @@ button {
     border-radius: 999px;
   }
 
-  /* Reopen button on Mobile */
-  .btn-reopen-scroll {
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: max(68px, calc(env(safe-area-inset-bottom) + 58px));
-    width: calc(100vw - 32px);
-    max-width: 320px;
-    padding: 10px 16px;
-    font-size: 0.82rem;
-    text-align: center;
-  }
-
-  /* Controls fixed at bottom corner */
-  .controls {
-    right: max(14px, env(safe-area-inset-right));
+  /* Bottom Dock Bar on Mobile (Căn giữa hàng hoàn hảo) */
+  .bottom-dock-bar {
     bottom: max(12px, env(safe-area-inset-bottom));
-    gap: 6px;
+    padding: 0 max(12px, env(safe-area-inset-left)) 0 max(12px, env(safe-area-inset-right));
   }
 
-  .controls button {
+  .dock-ctrl-btn {
     height: 38px;
     min-width: 38px;
-    padding: 0 12px;
-    font-size: 0.78rem;
+    padding: 0 10px;
+    font-size: 0.76rem;
   }
 
-  .controls button span {
-    font-size: 0.76rem;
+  .dock-sound-btn {
+    width: 38px;
+    padding: 0;
+  }
+
+  .dock-center-slot {
+    padding: 0 6px;
+  }
+
+  .btn-reopen-scroll {
+    padding: 8px 14px;
+    font-size: 0.78rem;
   }
 }
 

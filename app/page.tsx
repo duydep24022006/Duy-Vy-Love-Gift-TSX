@@ -1183,21 +1183,33 @@ export default function Home() {
               </button>
             </div>
           </div>
-        ) : showBannerCard ? (
-          <button
-            className="btn-reopen-scroll"
-            onClick={() => setShowScrollNote(true)}
-          >
-            📜 Xem thiệp chúc Trung Thu của Anh
-          </button>
         ) : null}
 
-        {/* Nút điều khiển góc phải */}
-        <div className="controls">
-          <button onClick={replay} aria-label="Xem lại từ đầu" title="Xem lại từ đầu">
-            <RotateCcw size={18} /> <span>Xem lại</span>
-          </button>
+        {/* Thanh điều khiển đáy màn hình: Xem lại (trái) — Xem thiệp chúc (ở GIỮA HÀNG) — Loa (phải) */}
+        <div className="bottom-dock-bar">
           <button
+            className="dock-ctrl-btn"
+            onClick={replay}
+            aria-label="Xem lại từ đầu"
+            title="Xem lại từ đầu"
+          >
+            <RotateCcw size={17} /> <span>Xem lại</span>
+          </button>
+
+          <div className="dock-center-slot">
+            {showBannerCard && !showScrollNote && (
+              <button
+                className="btn-reopen-scroll"
+                onClick={() => setShowScrollNote(true)}
+                title="Mở lại thiệp chúc"
+              >
+                📜 Xem thiệp chúc
+              </button>
+            )}
+          </div>
+
+          <button
+            className="dock-ctrl-btn dock-sound-btn"
             onClick={() => setSoundOn((value) => !value)}
             aria-label={soundOn ? "Tắt âm thanh" : "Bật âm thanh"}
             title={soundOn ? "Tắt âm thanh" : "Bật âm thanh"}
