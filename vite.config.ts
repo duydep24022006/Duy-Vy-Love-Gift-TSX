@@ -1,6 +1,7 @@
 import vinext from "vinext";
 import { defineConfig } from "vite";
 import { nitro } from "nitro/vite";
+import tailwindcss from "@tailwindcss/vite";
 import { readExecutionProfile } from "./scripts/execution-profile.mjs";
 import { sites } from "./build/sites-vite-plugin";
 
@@ -16,6 +17,7 @@ export default defineConfig(async () => {
           allowedHosts: ["terminal.local"],
         }
         : {}),
+
       ...(isCodexSeatbeltSandbox
         ? {
           watch: {
@@ -27,6 +29,7 @@ export default defineConfig(async () => {
     },
 
     plugins: [
+      tailwindcss(),
       vinext(),
       sites({ mockAuth: !managedLinux }),
       nitro(),
