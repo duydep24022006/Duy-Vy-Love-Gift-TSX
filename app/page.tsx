@@ -321,41 +321,38 @@ function LoveParticleCanvas({
         let isOrbiting = false;
 
         // Stage Timeline:
-        // 0.0s - 2.5s: Orbit flying wide screen (Stage 1 - EXACTLY 1 ROTATION)
-        // 2.5s - 3.2s: Swoop into exact center (Stage 2)
-        // 3.2s - 3.7s: Stop in center & pucker face 😚 (Stage 3 - Pause)
-        // 3.7s - 5.8s: Red particle heart explosion erupts from rabbit mouth in center (Stage 4)
-        // 5.0s: Banner drops down from top (Stage 5)
-        // 5.8s: Complete (Stage 6)
+        // 0.0s - 2.4s: Orbit flying wide screen (Stage 1 - EXACTLY 1 SINGLE ROTATION LANDING AT CENTER)
+        // 2.4s - 2.9s: Stop in center & pucker face 😚 (Stage 2 - Pause & Kiss Sound)
+        // 2.9s - 5.0s: Red particle heart explosion erupts from rabbit mouth in center (Stage 3)
+        // 4.2s: Banner drops down from top (Stage 4)
+        // 5.0s: Complete (Stage 5)
 
-        if (elapsed < 2.5) {
-          // STAGE 1: Orbit Flying Wide Screen (1 Single Elegant Orbit)
+        if (elapsed < 2.4) {
+          // STAGE 1: Orbit Flying Wide Screen (1 Single Seamless Orbit Landing directly in center!)
           isOrbiting = true;
-          const tProgress = elapsed / 2.5;
+          const tProgress = Math.min(elapsed / 2.4, 1.0);
           const easedProgress = Math.sin(tProgress * Math.PI * 0.5);
-          const angle = easedProgress * Math.PI * 2; // EXACTLY 1 Rotation!
 
-          const rx = width * 0.42;
-          const ry = height * 0.34;
+          // Angle from -PI/2 (top-center) completing 360 degrees (2*PI)
+          const angle = -Math.PI / 2 + easedProgress * Math.PI * 2;
+
+          // Radius smoothly decays in the final 30% of flight so rabbit glides directly into exact center (cx, cy)!
+          const rFactor = tProgress < 0.7 ? 1.0 : Math.cos(((tProgress - 0.7) / 0.3) * Math.PI * 0.5);
+
+          const rx = width * 0.42 * rFactor;
+          const ry = height * 0.32 * rFactor;
 
           targetX = cx + Math.cos(angle) * rx;
           targetY = cy + Math.sin(angle) * ry;
 
           const depthFactor = (Math.sin(angle) + 1) / 2; // 0 to 1
           const zoomPulse = Math.sin(elapsed * 10) * 0.08;
-          targetScale = 0.45 + depthFactor * 1.65 + zoomPulse; // 0.45x -> 2.18x depth zoom
+          targetScale = 0.45 + depthFactor * 1.55 + zoomPulse; // 0.45x -> 2.0x depth zoom
           emoji = "🐰";
-        } else if (elapsed < 3.2) {
-          // STAGE 2: Smooth Swoop into Exact Center
-          isOrbiting = true;
+        } else if (elapsed < 2.9) {
+          // STAGE 2: Stop gracefully in exact center, turn to Kiss Face 😚, trigger sound
           targetX = cx;
-          targetY = cy;
-          targetScale = 1.85;
-          emoji = "🐰";
-        } else if (elapsed < 3.7) {
-          // STAGE 3: Stop gracefully in center, turn to Kiss Face 😚, sound trigger
-          targetX = cx;
-          targetY = cy + Math.sin((elapsed - 3.2) * 8) * 5; // Gentle hover bobbing
+          targetY = cy + Math.sin((elapsed - 2.4) * 8) * 4; // Gentle hover bobbing
           targetScale = 2.05;
           emoji = "😚";
 
@@ -363,18 +360,18 @@ function LoveParticleCanvas({
             kissSoundFired = true;
             onPlayKissSound();
           }
-        } else if (elapsed < 5.8) {
-          // STAGE 4: Red Heart Explosion Erupts from Rabbit Mouth in Center!
+        } else if (elapsed < 5.0) {
+          // STAGE 3: Red Heart Explosion Erupts from Rabbit Mouth in Center!
           targetX = cx;
-          targetY = cy + Math.sin((elapsed - 3.7) * 6) * 4;
+          targetY = cy + Math.sin((elapsed - 2.9) * 6) * 3;
           targetScale = 2.0;
-          emoji = elapsed - 3.7 > 1.2 ? "🥰" : "😚";
+          emoji = elapsed - 2.9 > 1.0 ? "🥰" : "😚";
 
           if (!explosionStartTime) explosionStartTime = now;
           const kElapsed = (now - explosionStartTime) / 1000;
 
           const scaleFactor = 0.2 + Math.pow(kElapsed, 0.85) * 1.45;
-          const globalAlpha = Math.max(0, 1 - Math.pow(kElapsed / 2.0, 1.4));
+          const globalAlpha = Math.max(0, 1 - Math.pow(kElapsed / 1.8, 1.4));
 
           ctx.save();
           ctx.translate(curX, curY); // Burst directly from center / rabbit mouth!
@@ -400,13 +397,13 @@ function LoveParticleCanvas({
 
           ctx.restore();
 
-          // Stage 5: Banner trigger at ~5.0s
-          if (elapsed >= 5.0 && !bannerFired) {
+          // Stage 4: Banner trigger at ~4.2s
+          if (elapsed >= 4.2 && !bannerFired) {
             bannerFired = true;
             onShowBanner();
           }
         } else {
-          // Stage 6: Complete
+          // Stage 5: Complete
           if (!completeFired) {
             completeFired = true;
             onComplete();
