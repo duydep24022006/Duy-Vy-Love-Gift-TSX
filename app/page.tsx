@@ -215,48 +215,60 @@ function LoveParticleCanvas({
       const elapsed = (now - startTime) / 1000;
       ctx.clearRect(0, 0, width, height);
 
-      // 1. DYNAMIC RABBIT FLYING ACROSS ENTIRE SCREEN + HEART TAIL (Ảnh 1)
+      // 1. DYNAMIC RABBIT FLYING ACROSS ENTIRE SCREEN + HEART TAIL + 3D ZOOM IN / ZOOM OUT (Ảnh 1)
       if (isFlying) {
-        // Orbit angle: 1.5 turns over 3.1s across WHOLE SCREEN
-        const progress = Math.min(elapsed / 3.1, 1);
-        const angle = progress * Math.PI * 3; // 1.5 turns
-        
-        // Wide radius covering almost full viewport width and height
-        const rx = width * 0.41;
-        const ry = height * 0.32;
+        // Smooth 60fps flight time: 3.2s total duration for 1.5 turns
+        const duration = 3.2;
+        const rawProgress = Math.min(elapsed / duration, 1);
+
+        // Eased progress for ultra-smooth micro-step motion
+        const easedProgress = Math.sin(rawProgress * Math.PI * 0.5);
+        const angle = easedProgress * Math.PI * 3; // 1.5 turns
+
+        // Smooth 3D elliptical flight path
+        const rx = width * 0.42;
+        const ry = height * 0.34;
         const cx = width / 2;
         const cy = height * 0.44;
 
         const bx = cx + Math.cos(angle) * rx;
         const by = cy + Math.sin(angle) * ry;
 
-        // Depth perspective scale: 0.7x (far top) -> 1.55x (near bottom)
-        const scale = 0.7 + (Math.sin(angle) + 1) * 0.42;
-        const bunnyFontSize = Math.round(55 * scale);
+        // Dynamic 3D Zoom In / Zoom Out:
+        // Top of orbit (sin = -1): thu nhỏ 0.45x (xa, mờ nhẹ)
+        // Bottom of orbit (sin = +1): phóng to 2.18x (gần, rực rỡ)
+        // Plus subtle 3D breathing pulse oscillation
+        const depthFactor = (Math.sin(angle) + 1) / 2; // 0 to 1
+        const zoomPulse = Math.sin(elapsed * 12) * 0.08;
+        const scale = 0.45 + depthFactor * 1.65 + zoomPulse; // 0.45x -> 2.18x!
 
-        // Draw Bunny Emoji flying across screen
+        const bunnyFontSize = Math.max(20, Math.round(52 * scale));
+
+        // Draw Bunny Emoji with 3D Depth Glow & Zoom
         ctx.save();
+        ctx.globalAlpha = Math.min(1, 0.65 + depthFactor * 0.35);
         ctx.font = `${bunnyFontSize}px sans-serif`;
-        ctx.shadowColor = "#ffeb3b";
-        ctx.shadowBlur = 25;
+        ctx.shadowColor = depthFactor > 0.6 ? "#ffe082" : "#ffd54f";
+        ctx.shadowBlur = Math.round(10 + depthFactor * 30);
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("🐰", bx, by);
         ctx.restore();
 
-        // Emit heart particles continuously from bunny position (vệt đuôi mất sau 0.7s-1s)
+        // Sub-step particle emission for ultra-smooth heart tail (Ảnh 1)
         const trailChars = ["❤️", "💖", "💕", "❣️"];
-        for (let k = 0; k < 2; k++) {
+        const emitCount = scale > 1.2 ? 3 : 2;
+        for (let k = 0; k < emitCount; k++) {
           trailParticles.push({
-            x: bx - Math.cos(angle) * 20 + (Math.random() - 0.5) * 16,
-            y: by - Math.sin(angle) * 20 + (Math.random() - 0.5) * 16,
-            size: (Math.random() * 10 + 14) * scale,
-            alpha: 1,
-            vx: -Math.cos(angle) * 2.5 + (Math.random() - 0.5) * 1.5,
-            vy: -Math.sin(angle) * 2.5 + (Math.random() - 0.5) * 1.5,
+            x: bx - Math.cos(angle) * 18 + (Math.random() - 0.5) * 12,
+            y: by - Math.sin(angle) * 18 + (Math.random() - 0.5) * 12,
+            size: (Math.random() * 8 + 12) * scale,
+            alpha: 0.95,
+            vx: -Math.cos(angle) * 2.2 + (Math.random() - 0.5) * 1.2,
+            vy: -Math.sin(angle) * 2.2 + (Math.random() - 0.5) * 1.2,
             char: trailChars[Math.floor(Math.random() * trailChars.length)],
             life: 0,
-            maxLife: 0.7 + Math.random() * 0.3, // Mất dần sau 0.7s - 1s
+            maxLife: 0.6 + Math.random() * 0.3, // ~0.6s - 0.9s decay
           });
         }
       }
