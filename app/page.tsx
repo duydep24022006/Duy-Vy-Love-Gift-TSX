@@ -218,7 +218,13 @@ function LoveParticleCanvas({
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  // Preserve callback references across re-renders to prevent useEffect from restarting mid-animation
+  const callbacksRef = useRef({ onPlayKissSound, onShowBanner, onComplete });
+  callbacksRef.current = { onPlayKissSound, onShowBanner, onComplete };
+
   useEffect(() => {
+    if (!isActive) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -310,152 +316,150 @@ function LoveParticleCanvas({
 
       ctx.clearRect(0, 0, width, height);
 
-      if (isActive) {
-        const cx = width / 2;
-        const cy = height * 0.44;
+      const cx = width / 2;
+      const cy = height * 0.44;
 
-        let targetX = cx;
-        let targetY = cy;
-        let targetScale = 1.0;
-        let emoji = "🐰";
-        let isOrbiting = false;
+      let targetX = cx;
+      let targetY = cy;
+      let targetScale = 1.0;
+      let emoji = "🐰";
+      let isOrbiting = false;
 
-        // Stage Timeline:
-        // 0.0s - 2.4s: Orbit flying wide screen (Stage 1 - EXACTLY 1 SINGLE ROTATION LANDING AT CENTER)
-        // 2.4s - 2.9s: Stop in center & pucker face 😚 (Stage 2 - Pause & Kiss Sound)
-        // 2.9s - 5.0s: Red particle heart explosion erupts from rabbit mouth in center (Stage 3)
-        // 4.2s: Banner drops down from top (Stage 4)
-        // 5.0s: Complete (Stage 5)
+      // Stage Timeline:
+      // 0.0s - 2.4s: Orbit flying wide screen (Stage 1 - EXACTLY 1 SINGLE ROTATION LANDING AT CENTER)
+      // 2.4s - 2.9s: Stop in center & pucker face 😚 (Stage 2 - Pause & Kiss Sound)
+      // 2.9s - 5.0s: Red particle heart explosion erupts from rabbit mouth in center (Stage 3)
+      // 4.2s: Banner drops down from top (Stage 4)
+      // 5.0s: Complete (Stage 5)
 
-        if (elapsed < 2.4) {
-          // STAGE 1: Orbit Flying Wide Screen (1 Single Seamless Orbit Landing directly in center!)
-          isOrbiting = true;
-          const tProgress = Math.min(elapsed / 2.4, 1.0);
-          const easedProgress = Math.sin(tProgress * Math.PI * 0.5);
+      if (elapsed < 2.4) {
+        // STAGE 1: Orbit Flying Wide Screen (1 Single Seamless Orbit Landing directly in center!)
+        isOrbiting = true;
+        const tProgress = Math.min(elapsed / 2.4, 1.0);
+        const easedProgress = Math.sin(tProgress * Math.PI * 0.5);
 
-          // Angle from -PI/2 (top-center) completing 360 degrees (2*PI)
-          const angle = -Math.PI / 2 + easedProgress * Math.PI * 2;
+        // Angle from -PI/2 (top-center) completing 360 degrees (2*PI)
+        const angle = -Math.PI / 2 + easedProgress * Math.PI * 2;
 
-          // Radius smoothly decays in the final 30% of flight so rabbit glides directly into exact center (cx, cy)!
-          const rFactor = tProgress < 0.7 ? 1.0 : Math.cos(((tProgress - 0.7) / 0.3) * Math.PI * 0.5);
+        // Radius smoothly decays in the final 30% of flight so rabbit glides directly into exact center (cx, cy)!
+        const rFactor = tProgress < 0.7 ? 1.0 : Math.cos(((tProgress - 0.7) / 0.3) * Math.PI * 0.5);
 
-          const rx = width * 0.42 * rFactor;
-          const ry = height * 0.32 * rFactor;
+        const rx = width * 0.42 * rFactor;
+        const ry = height * 0.32 * rFactor;
 
-          targetX = cx + Math.cos(angle) * rx;
-          targetY = cy + Math.sin(angle) * ry;
+        targetX = cx + Math.cos(angle) * rx;
+        targetY = cy + Math.sin(angle) * ry;
 
-          const depthFactor = (Math.sin(angle) + 1) / 2; // 0 to 1
-          const zoomPulse = Math.sin(elapsed * 10) * 0.08;
-          targetScale = 0.45 + depthFactor * 1.55 + zoomPulse; // 0.45x -> 2.0x depth zoom
-          emoji = "🐰";
-        } else if (elapsed < 2.9) {
-          // STAGE 2: Stop gracefully in exact center, turn to Kiss Face 😚, trigger sound
-          targetX = cx;
-          targetY = cy + Math.sin((elapsed - 2.4) * 8) * 4; // Gentle hover bobbing
-          targetScale = 2.05;
-          emoji = "😚";
+        const depthFactor = (Math.sin(angle) + 1) / 2; // 0 to 1
+        const zoomPulse = Math.sin(elapsed * 10) * 0.08;
+        targetScale = 0.45 + depthFactor * 1.55 + zoomPulse; // 0.45x -> 2.0x depth zoom
+        emoji = "🐰";
+      } else if (elapsed < 2.9) {
+        // STAGE 2: Stop gracefully in exact center, turn to Kiss Face 😚, trigger sound
+        targetX = cx;
+        targetY = cy + Math.sin((elapsed - 2.4) * 8) * 4; // Gentle hover bobbing
+        targetScale = 2.05;
+        emoji = "😚";
 
-          if (!kissSoundFired) {
-            kissSoundFired = true;
-            onPlayKissSound();
+        if (!kissSoundFired) {
+          kissSoundFired = true;
+          callbacksRef.current.onPlayKissSound();
+        }
+      } else if (elapsed < 5.0) {
+        // STAGE 3: Red Heart Explosion Erupts from Rabbit Mouth in Center!
+        targetX = cx;
+        targetY = cy + Math.sin((elapsed - 2.9) * 6) * 3;
+        targetScale = 2.0;
+        emoji = elapsed - 2.9 > 1.0 ? "🥰" : "😚";
+
+        if (!explosionStartTime) explosionStartTime = now;
+        const kElapsed = (now - explosionStartTime) / 1000;
+
+        const scaleFactor = 0.2 + Math.pow(kElapsed, 0.85) * 1.45;
+        const globalAlpha = Math.max(0, 1 - Math.pow(kElapsed / 1.8, 1.4));
+
+        ctx.save();
+        ctx.translate(curX, curY); // Burst directly from center / rabbit mouth!
+
+        heartCloudParticles.forEach((p) => {
+          const px = p.targetX * scaleFactor;
+          const py = p.targetY * scaleFactor;
+          const a = p.alpha * globalAlpha;
+
+          if (a > 0.01) {
+            ctx.save();
+            ctx.globalAlpha = a;
+            ctx.fillStyle = p.color;
+            ctx.shadowColor = "#ff0044";
+            ctx.shadowBlur = Math.round(12 * (1 + scaleFactor * 0.4));
+
+            ctx.beginPath();
+            ctx.arc(px, py, p.size * (0.85 + scaleFactor * 0.25), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
           }
-        } else if (elapsed < 5.0) {
-          // STAGE 3: Red Heart Explosion Erupts from Rabbit Mouth in Center!
-          targetX = cx;
-          targetY = cy + Math.sin((elapsed - 2.9) * 6) * 3;
-          targetScale = 2.0;
-          emoji = elapsed - 2.9 > 1.0 ? "🥰" : "😚";
+        });
 
-          if (!explosionStartTime) explosionStartTime = now;
-          const kElapsed = (now - explosionStartTime) / 1000;
+        ctx.restore();
 
-          const scaleFactor = 0.2 + Math.pow(kElapsed, 0.85) * 1.45;
-          const globalAlpha = Math.max(0, 1 - Math.pow(kElapsed / 1.8, 1.4));
+        // Stage 4: Banner trigger at ~4.2s
+        if (elapsed >= 4.2 && !bannerFired) {
+          bannerFired = true;
+          callbacksRef.current.onShowBanner();
+        }
+      } else {
+        // Stage 5: Complete
+        if (!completeFired) {
+          completeFired = true;
+          callbacksRef.current.onComplete();
+        }
+      }
 
-          ctx.save();
-          ctx.translate(curX, curY); // Burst directly from center / rabbit mouth!
+      // Ultra-smooth 60fps/120fps physics lerp smoothing
+      const lerpFactor = 1 - Math.exp(-14 * dt);
+      const prevX = curX;
+      const prevY = curY;
 
-          heartCloudParticles.forEach((p) => {
-            const px = p.targetX * scaleFactor;
-            const py = p.targetY * scaleFactor;
-            const a = p.alpha * globalAlpha;
+      curX += (targetX - curX) * lerpFactor;
+      curY += (targetY - curY) * lerpFactor;
+      curScale += (targetScale - curScale) * lerpFactor;
 
-            if (a > 0.01) {
-              ctx.save();
-              ctx.globalAlpha = a;
-              ctx.fillStyle = p.color;
-              ctx.shadowColor = "#ff0044";
-              ctx.shadowBlur = Math.round(12 * (1 + scaleFactor * 0.4));
+      // Emit Heart Tail Particles when rabbit is flying/swooping
+      if (isOrbiting) {
+        const dx = curX - prevX;
+        const dy = curY - prevY;
+        const speed = Math.hypot(dx, dy);
 
-              ctx.beginPath();
-              ctx.arc(px, py, p.size * (0.85 + scaleFactor * 0.25), 0, Math.PI * 2);
-              ctx.fill();
-              ctx.restore();
-            }
-          });
-
-          ctx.restore();
-
-          // Stage 4: Banner trigger at ~4.2s
-          if (elapsed >= 4.2 && !bannerFired) {
-            bannerFired = true;
-            onShowBanner();
-          }
-        } else {
-          // Stage 5: Complete
-          if (!completeFired) {
-            completeFired = true;
-            onComplete();
+        if (speed > 0.8) {
+          const trailChars = ["❤️", "💖", "💕", "❣️"];
+          const count = curScale > 1.2 ? 3 : 2;
+          for (let k = 0; k < count; k++) {
+            trailParticles.push({
+              x: curX - dx * 0.8 + (Math.random() - 0.5) * 14,
+              y: curY - dy * 0.8 + (Math.random() - 0.5) * 14,
+              size: (Math.random() * 8 + 14) * curScale,
+              alpha: 0.95,
+              vx: -dx * 0.25 + (Math.random() - 0.5) * 1.5,
+              vy: -dy * 0.25 + (Math.random() - 0.5) * 1.5,
+              char: trailChars[Math.floor(Math.random() * trailChars.length)],
+              life: 0,
+              maxLife: 0.6 + Math.random() * 0.3,
+            });
           }
         }
+      }
 
-        // Ultra-smooth 60fps/120fps physics lerp smoothing
-        const lerpFactor = 1 - Math.exp(-14 * dt);
-        const prevX = curX;
-        const prevY = curY;
-
-        curX += (targetX - curX) * lerpFactor;
-        curY += (targetY - curY) * lerpFactor;
-        curScale += (targetScale - curScale) * lerpFactor;
-
-        // Emit Heart Tail Particles when rabbit is flying/swooping
-        if (isOrbiting) {
-          const dx = curX - prevX;
-          const dy = curY - prevY;
-          const speed = Math.hypot(dx, dy);
-
-          if (speed > 0.8) {
-            const trailChars = ["❤️", "💖", "💕", "❣️"];
-            const count = curScale > 1.2 ? 3 : 2;
-            for (let k = 0; k < count; k++) {
-              trailParticles.push({
-                x: curX - dx * 0.8 + (Math.random() - 0.5) * 14,
-                y: curY - dy * 0.8 + (Math.random() - 0.5) * 14,
-                size: (Math.random() * 8 + 14) * curScale,
-                alpha: 0.95,
-                vx: -dx * 0.25 + (Math.random() - 0.5) * 1.5,
-                vy: -dy * 0.25 + (Math.random() - 0.5) * 1.5,
-                char: trailChars[Math.floor(Math.random() * trailChars.length)],
-                life: 0,
-                maxLife: 0.6 + Math.random() * 0.3,
-              });
-            }
-          }
-        }
-
-        // Draw Bunny Emoji on Canvas with high-res glow & depth
-        if (elapsed < 6.4) {
-          ctx.save();
-          const bunnyFontSize = Math.max(22, Math.round(50 * curScale));
-          ctx.font = `${bunnyFontSize}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`;
-          ctx.shadowColor = elapsed >= 3.7 ? "#ff4081" : "#ffe082";
-          ctx.shadowBlur = Math.round(14 + curScale * 16);
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(emoji, curX, curY);
-          ctx.restore();
-        }
+      // Draw Bunny Emoji on Canvas with high-res glow & depth
+      if (elapsed < 5.0) {
+        ctx.save();
+        const bunnyFontSize = Math.max(22, Math.round(50 * curScale));
+        ctx.font = `${bunnyFontSize}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`;
+        ctx.shadowColor = elapsed >= 2.4 ? "#ff4081" : "#ffe082";
+        ctx.shadowBlur = Math.round(14 + curScale * 16);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(emoji, curX, curY);
+        ctx.restore();
       }
 
       // Render & update trail particles (fade out in ~0.6s - 0.9s)
@@ -490,7 +494,7 @@ function LoveParticleCanvas({
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", handleResize);
     };
-  }, [isActive, onPlayKissSound, onShowBanner, onComplete]);
+  }, [isActive]);
 
   return (
     <canvas
