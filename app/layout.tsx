@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Duy & Vy — Món quà bất ngờ",
-  description: "Một món quà tình yêu nhỏ Duy dành riêng cho Vy.",
+  title: "Anh & Vợ iu — Món quà bất ngờ",
+  description: "Một món quà tình yêu nhỏ anh dành riêng cho vợ iu.",
   other: {
     "codex-preview": "development",
   },

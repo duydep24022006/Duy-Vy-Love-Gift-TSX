@@ -25,23 +25,23 @@ interface CustomLantern {
 }
 
 const midAutumnWishes = [
-  "Trăng rằm sáng nhất đêm nay, nhưng nụ cười của Vy còn sáng hơn! ✨",
-  "Chia Vy nửa cái bánh thập cẩm, còn nửa trái tim Duy thì gửi trọn cho em luôn! 🥮",
-  "Đêm rằm có Chị Hằng, Chú Cuội, còn Duy thì chỉ muốn ở cạnh Vy thôi! 🌙",
-  "Bé Vy bớt bướng lại một xíu nha, nhưng mà bướng cỡ nào Duy cũng thương! 🐰",
-  "Rước đèn cùng Duy qua hết mùa trăng này đến thật nhiều mùa trăng sau nữa nhé! 🏮",
-  "Công chúa thỏ ngọc của Duy hôm nay đã ăn bánh Trung Thu chưa nè? ♥",
-  "Ước cho Vy luôn vui vẻ, đáng yêu và mãi bên cạnh Duy!",
-  "Vy bướng thế này chỉ có mỗi Duy đủ kiên nhẫn chiều chuộng thôi đó nha! 😜",
+  "Trăng rằm sáng nhất đêm nay, nhưng nụ cười của vợ iu còn sáng hơn! ✨",
+  "Chia vợ iu nửa cái bánh thập cẩm, còn nửa trái tim anh thì gửi trọn cho em luôn! 🥮",
+  "Đêm rằm có Chị Hằng, Chú Cuội, còn anh thì chỉ muốn ở cạnh vợ iu thôi! 🌙",
+  "Vợ iu bớt bướng lại một xíu nha, nhưng mà bướng cỡ nào anh cũng thương! 🐰",
+  "Rước đèn cùng anh qua hết mùa trăng này đến thật nhiều mùa trăng sau nữa nhé! 🏮",
+  "Công chúa thỏ ngọc của anh hôm nay đã ăn bánh Trung Thu chưa nè? ♥",
+  "Ước cho vợ iu luôn vui vẻ, đáng yêu và mãi bên cạnh anh!",
+  "Vợ iu bướng thế này chỉ có mỗi anh đủ kiên nhẫn chiều chuộng thôi đó nha! 😜",
 ];
 
 const rabbitQuotes = [
-  "Vy ơi đừng bướng nữa nha, thỏ méch Duy đó! 🐰",
-  "Chia Vy một miếng bánh dẻo siêu ngọt nè! 🥮",
-  "Duy bảo là thương Vy nhất trên đời luôn á! ♥",
-  "Tối nay đi rước đèn với Duy nhớ nắm tay chặt nha! 🏮",
-  "Bé Vy hôm nay xinh hơn cả Chị Hằng Nga luôn! ✨",
-  "Thỏ chúc Vy Trung Thu ấm áp và ngập tràn hạnh phúc!",
+  "Vợ iu ơi đừng bướng nữa nha, thỏ méch anh đó! 🐰",
+  "Chia vợ iu một miếng bánh dẻo siêu ngọt nè! 🥮",
+  "Anh bảo là thương vợ iu nhất trên đời luôn á! ♥",
+  "Tối nay đi rước đèn với anh nhớ nắm tay chặt nha! 🏮",
+  "Vợ iu hôm nay xinh hơn cả Chị Hằng Nga luôn! ✨",
+  "Thỏ chúc vợ iu Trung Thu ấm áp và ngập tràn hạnh phúc!",
 ];
 
 function seeded(index: number, salt: number) {
@@ -615,7 +615,7 @@ function DraggableLantern({
           <div className="photo-lantern-inner">
             <img
               src={photoUrl || "/photos/photo_1.jpg"}
-              alt="Kỷ niệm Duy & Vy"
+              alt="Kỷ niệm Anh & Vợ iu"
               className="photo-lantern-img"
               loading="lazy"
             />
@@ -626,7 +626,7 @@ function DraggableLantern({
       ) : type === "sky" ? (
         <div className="sky-lantern-box" style={{ width: size, height: size * 1.3 }}>
           <span className="lantern-flame" />
-          <span className="lantern-text">{text || "Vy ♥"}</span>
+          <span className="lantern-text">{text || "Vợ iu ♥"}</span>
           {isHeld && <span className="lantern-drag-halo" />}
         </div>
       ) : (
@@ -643,7 +643,7 @@ export default function Home() {
   const [phase, setPhase] = useState<Phase>("intro");
   const [soundOn, setSoundOn] = useState(true);
   const [rabbitMessage, setRabbitMessage] = useState(
-    "Vy ơi chạm vào thỏ đi nè! 🐰"
+    "Vợ iu ơi chạm vào thỏ đi nè! 🐰"
   );
   const [rabbitHopCount, setRabbitHopCount] = useState(0);
   const [extraLanterns, setExtraLanterns] = useState<CustomLantern[]>([]);
@@ -656,7 +656,7 @@ export default function Home() {
   const flyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bgmAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // 28 Bức ảnh kỷ niệm của Duy & Vy tải từ Google Drive
+  // 28 Bức ảnh kỷ niệm của Anh & Vợ iu tải từ Google Drive
   const totalPhotos = 28;
 
   // Thả ngẫu nhiên 1 chiếc lồng đèn ảnh mini bo viền khi ấn vào màn hình
@@ -955,7 +955,7 @@ export default function Home() {
           <Sparkles size={16} /> Đêm Rằm Tháng 8 · Trung Thu Yêu Thương
         </p>
         <h1 className="intro-title">
-          Vy ơi, cùng Duy
+          Vợ iu ơi, cùng anh
           <br />
           <span>đón Tết Trung Thu nhé!</span>
         </h1>
@@ -986,7 +986,7 @@ export default function Home() {
         </button>
 
         <div className="autumn-signature">
-          Duy <Heart size={14} fill="currentColor" /> Vy · Mùa Trăng Đoàn Viên
+          Anh <Heart size={14} fill="currentColor" /> Vợ iu · Mùa Trăng Đoàn Viên
         </div>
       </section>
 
@@ -1099,7 +1099,7 @@ export default function Home() {
               initialLeft={l.left}
               duration={l.duration}
               delay={l.delay}
-              text="Vy ♥"
+              text="Vợ iu ♥"
               photoUrl={l.photoUrl}
             />
           ))}
@@ -1113,7 +1113,7 @@ export default function Home() {
               size={l.size}
               initialLeft={l.x}
               duration={l.speed}
-              text="Duy ♥ Vy"
+              text="Anh ♥ Vợ iu"
               photoUrl={l.photoUrl}
             />
           ))}
@@ -1158,7 +1158,7 @@ export default function Home() {
             </div>
 
             <h2 className="couple-heading">
-              Duy <Heart className="heading-heart" fill="currentColor" /> Vy
+              Anh <Heart className="heading-heart" fill="currentColor" /> Vợ iu
             </h2>
 
             <p className="main-autumn-wish">
@@ -1188,7 +1188,7 @@ export default function Home() {
             className="btn-reopen-scroll"
             onClick={() => setShowScrollNote(true)}
           >
-            📜 Xem thiệp chúc Trung Thu của Duy
+            📜 Xem thiệp chúc Trung Thu của Anh
           </button>
         ) : null}
 
