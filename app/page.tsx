@@ -19,8 +19,9 @@ interface CustomLantern {
   x: number;
   speed: number;
   size: number;
-  type: "sky" | "star";
+  type: "sky" | "star" | "photo";
   wish: string;
+  photoUrl?: string;
 }
 
 const midAutumnWishes = [
@@ -509,7 +510,7 @@ function LoveParticleCanvas({
   );
 }
 
-// Chiếc lồng đèn có thể cầm chuột hoặc ngón tay để kéo đi khắp màn hình
+// Chiếc lồng đèn (hoặc ảnh mini bo viền) có thể cầm chuột hoặc ngón tay để kéo đi khắp màn hình
 function DraggableLantern({
   type,
   size,
@@ -517,14 +518,16 @@ function DraggableLantern({
   duration,
   delay = 0,
   text,
+  photoUrl,
 }: {
   id?: number | string;
-  type: "sky" | "star";
+  type: "sky" | "star" | "photo";
   size: number;
   initialLeft: number;
   duration: number;
   delay?: number;
   text?: string;
+  photoUrl?: string;
 }) {
   const [isHeld, setIsHeld] = useState(false);
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
@@ -603,9 +606,24 @@ function DraggableLantern({
               touchAction: "none",
             }
       }
-      title="Chạm hoặc kéo lồng đèn để di chuyển theo tay / chuột"
+      title="Chạm hoặc kéo để di chuyển ảnh / lồng đèn theo tay"
     >
-      {type === "sky" ? (
+      {type === "photo" ? (
+        <div className="photo-lantern-box" style={{ width: size, height: size * 1.2 }}>
+          <div className="photo-lantern-hanger" />
+          <span className="photo-lantern-heart-tag">💖</span>
+          <div className="photo-lantern-inner">
+            <img
+              src={photoUrl || "/photos/photo_1.jpg"}
+              alt="Kỷ niệm Duy & Vy"
+              className="photo-lantern-img"
+              loading="lazy"
+            />
+          </div>
+          <span className="photo-lantern-flame" />
+          {isHeld && <span className="lantern-drag-halo" />}
+        </div>
+      ) : type === "sky" ? (
         <div className="sky-lantern-box" style={{ width: size, height: size * 1.3 }}>
           <span className="lantern-flame" />
           <span className="lantern-text">{text || "Vy ♥"}</span>
@@ -634,66 +652,36 @@ export default function Home() {
   const [isRabbitFlying, setIsRabbitFlying] = useState(false);
   const [isRabbitKissing, setIsRabbitKissing] = useState(false);
   const [showBannerCard, setShowBannerCard] = useState(false);
-  const [floatingPhotos, setFloatingPhotos] = useState<
-    Array<{
-      id: number;
-      photoUrl: string;
-      caption: string;
-      left: number;
-      duration: number;
-      rotStart: number;
-      rotEnd: number;
-    }>
-  >([]);
-
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bgmAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // 28 Bức ảnh kỷ niệm của Duy & Vy tải từ Google Drive
   const totalPhotos = 28;
-  const coupleLoveCaptions = useMemo(
-    () => [
-      "Duy thương Vy nhất trần đời ♥",
-      "Nụ cười của Vy sáng hơn cả trăng rằm ✨",
-      "Bé Vy bướng nhưng Duy thương nhất trần đời 🐰",
-      "Cùng Vy rước đèn qua thật nhiều mùa trăng 🏮",
-      "Kỷ niệm ngọt ngào của chúng mình 💖",
-      "Công chúa thỏ ngọc đáng yêu của Duy 🥮",
-      "Ước cho Vy luôn hạnh phúc và mãi bên Duy!",
-      "Mỗi khoảnh khắc bên em đều là phép màu 🌸",
-      "Đêm rằm có Chị Hằng, đời Duy có bé Vy 🌙",
-      "Yêu Vy nhiều hơn ngày hôm qua ♥",
-      "Hạnh phúc là từng phút giây ở cạnh Vy 💫",
-      "Trung Thu đoàn viên, ngọt ngào bên Vy 🏮",
-    ],
-    []
-  );
 
-  const spawnFloatingPhoto = useCallback(
+  // Thả ngẫu nhiên 1 chiếc lồng đèn ảnh mini bo viền khi ấn vào màn hình
+  const spawnFloatingPhotoLantern = useCallback(
     (clientX?: number) => {
       const photoNum = Math.floor(Math.random() * totalPhotos) + 1;
-      const captionIdx = Math.floor(Math.random() * coupleLoveCaptions.length);
-
-      let leftPercent = 15 + Math.random() * 60;
+      let leftPercent = 8 + Math.random() * 82;
       if (clientX && typeof window !== "undefined") {
-        leftPercent = Math.max(10, Math.min(75, (clientX / window.innerWidth) * 100));
+        leftPercent = Math.max(6, Math.min(88, (clientX / window.innerWidth) * 100));
       }
 
-      const newPhoto = {
+      const newPhotoLantern: CustomLantern = {
         id: Date.now() + Math.random(),
+        x: leftPercent,
+        speed: 12 + Math.random() * 6,
+        size: 54 + Math.random() * 10, // Mini size ~54px - 64px có bo viền
+        type: "photo",
+        wish: midAutumnWishes[Math.floor(Math.random() * midAutumnWishes.length)],
         photoUrl: `/photos/photo_${photoNum}.jpg`,
-        caption: coupleLoveCaptions[captionIdx],
-        left: leftPercent,
-        duration: 8 + Math.random() * 3, // 8s - 11s bay bổng từ từ lên trời
-        rotStart: (Math.random() - 0.5) * 8,
-        rotEnd: (Math.random() - 0.5) * 10,
       };
 
-      setFloatingPhotos((prev) => [...prev.slice(-15), newPhoto]);
+      setExtraLanterns((prev) => [...prev.slice(-30), newPhotoLantern]);
       if (soundOn) playMidAutumnSound("hop");
     },
-    [coupleLoveCaptions, soundOn]
+    [soundOn]
   );
 
   // Background stars
@@ -710,19 +698,25 @@ export default function Home() {
     []
   );
 
-  // Floating Sky Lanterns (Thiên Đăng & Đèn Ông Sao)
+  // Floating Sky Lanterns, Star Lanterns & Mini Photo Lanterns (Đèn trời & Lồng đèn ảnh mini)
   const defaultLanterns = useMemo(
     () =>
-      Array.from({ length: 18 }, (_, i) => ({
-        id: i,
-        left: 4 + seeded(i, 11) * 90,
-        size: 26 + seeded(i, 12) * 22,
-        duration: 10 + seeded(i, 13) * 10, // 10s - 20s
-        delay: seeded(i, 14) * -16,
-        swayDuration: 3 + seeded(i, 15) * 3,
-        type: (seeded(i, 16) > 0.45 ? "sky" : "star") as "sky" | "star",
-        wish: midAutumnWishes[i % midAutumnWishes.length],
-      })),
+      Array.from({ length: 24 }, (_, i) => {
+        const lanternType: "photo" | "sky" | "star" =
+          i % 3 === 0 ? "photo" : i % 3 === 1 ? "sky" : "star";
+        const photoNum = (i % totalPhotos) + 1;
+        return {
+          id: i,
+          left: 4 + seeded(i, 11) * 90,
+          size: lanternType === "photo" ? 54 + seeded(i, 12) * 10 : 26 + seeded(i, 12) * 22,
+          duration: 11 + seeded(i, 13) * 10, // 11s - 21s
+          delay: seeded(i, 14) * -16,
+          swayDuration: 3 + seeded(i, 15) * 3,
+          type: lanternType,
+          wish: midAutumnWishes[i % midAutumnWishes.length],
+          photoUrl: `/photos/photo_${photoNum}.jpg`,
+        };
+      }),
     []
   );
 
@@ -790,6 +784,39 @@ export default function Home() {
     };
   }, [soundOn, phase]);
 
+  // Tự động thả các lồng đèn ảnh mini bay lên ngẫu nhiên ngay cả khi không ấn nút
+  useEffect(() => {
+    if (phase !== "moonlight") return;
+
+    let timeoutId: NodeJS.Timeout;
+
+    const spawnAutoPhoto = () => {
+      const photoNum = Math.floor(Math.random() * totalPhotos) + 1;
+      const autoPhotoLantern: CustomLantern = {
+        id: Date.now() + Math.random(),
+        x: 5 + Math.random() * 88,
+        speed: 13 + Math.random() * 7, // Bay êm đềm 13s - 20s
+        size: 54 + Math.random() * 12, // Mini size ~54px - 66px có bo viền
+        type: "photo",
+        wish: midAutumnWishes[Math.floor(Math.random() * midAutumnWishes.length)],
+        photoUrl: `/photos/photo_${photoNum}.jpg`,
+      };
+
+      setExtraLanterns((prev) => [...prev.slice(-30), autoPhotoLantern]);
+
+      // Tự động lặp lại ngẫu nhiên sau mỗi 3.2s đến 5.2s
+      const nextDelay = 3200 + Math.random() * 2000;
+      timeoutId = setTimeout(spawnAutoPhoto, nextDelay);
+    };
+
+    // Chiếc đầu tiên tự động bay lên sau 1.2s bước vào đêm trăng
+    timeoutId = setTimeout(spawnAutoPhoto, 1200);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [phase]);
+
   useEffect(() => () => {
     if (timerRef.current) clearTimeout(timerRef.current);
     if (flyTimerRef.current) clearTimeout(flyTimerRef.current);
@@ -835,22 +862,23 @@ export default function Home() {
     if (soundOn) playMidAutumnSound("hop");
   };
 
-  // Release a new sky lantern + ngẫu nhiên bay 1 bức ảnh kỷ niệm
+  // Release a new sky lantern or mini photo lantern
   const releaseLantern = () => {
     if (soundOn) playMidAutumnSound("lantern");
+    const photoNum = Math.floor(Math.random() * totalPhotos) + 1;
+    const isPhoto = Math.random() > 0.35;
     const newLantern: CustomLantern = {
       id: Date.now(),
       x: 10 + Math.random() * 80,
       speed: 12 + Math.random() * 6,
-      size: 32 + Math.random() * 18,
-      type: Math.random() > 0.5 ? "sky" : "star",
+      size: isPhoto ? 54 + Math.random() * 10 : 32 + Math.random() * 18,
+      type: isPhoto ? "photo" : Math.random() > 0.5 ? "sky" : "star",
       wish: midAutumnWishes[Math.floor(Math.random() * midAutumnWishes.length)],
+      photoUrl: `/photos/photo_${photoNum}.jpg`,
     };
-    setExtraLanterns((prev) => [...prev.slice(-15), newLantern]);
+    setExtraLanterns((prev) => [...prev.slice(-30), newLantern]);
     // Also cycle wish in ribbon
     setActiveWishIndex((prev) => (prev + 1) % midAutumnWishes.length);
-    // Bật một bức ảnh kỷ niệm bay lên trời
-    spawnFloatingPhoto();
   };
 
   return (
@@ -981,11 +1009,11 @@ export default function Home() {
           const target = e.target as HTMLElement | null;
           if (
             target?.closest("button") ||
-            target?.closest(".floating-lantern-item.is-held")
+            target?.closest(".floating-lantern-item")
           ) {
             return;
           }
-          spawnFloatingPhoto(e.clientX);
+          spawnFloatingPhotoLantern(e.clientX);
         }}
       >
         {/* Canvas Engine Xử Lý Trái Tim Hạt Đỏ (Ảnh 2) & Đuôi Trái Tim Thỏ Bay (Ảnh 1) */}
@@ -1060,7 +1088,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* 3. CƠN MƯA THIÊN ĐĂNG & ĐÈN ÔNG SAO BAY LÊN (CẦM KÉO DI CHUYỂN THEO TAY/CHUỘT) */}
+        {/* 3. CƠN MƯA THIÊN ĐĂNG, ĐÈN ÔNG SAO & LỒNG ĐÈN ẢNH MINI DUY & VY (CẦM KÉO DI CHUYỂN THEO TAY/CHUỘT) */}
         <div className="lantern-sky-field">
           {defaultLanterns.map((l) => (
             <DraggableLantern
@@ -1072,10 +1100,11 @@ export default function Home() {
               duration={l.duration}
               delay={l.delay}
               text="Vy ♥"
+              photoUrl={l.photoUrl}
             />
           ))}
 
-          {/* Extra lanterns thả thủ công khi người dùng bấm */}
+          {/* Extra lanterns & Mini Photo Lanterns thả thủ công khi người dùng bấm */}
           {extraLanterns.map((l) => (
             <DraggableLantern
               key={l.id}
@@ -1085,6 +1114,7 @@ export default function Home() {
               initialLeft={l.x}
               duration={l.speed}
               text="Duy ♥ Vy"
+              photoUrl={l.photoUrl}
             />
           ))}
         </div>
@@ -1161,33 +1191,6 @@ export default function Home() {
             📜 Xem thiệp chúc Trung Thu của Duy
           </button>
         ) : null}
-
-        {/* 6. BỘ SƯU TẬP 28 ẢNH KỶ NIỆM CỦA DUY & VY BAY TỪ DƯỚI LÊN KHI ẤN BẤT KỲ ĐÂU */}
-        {floatingPhotos.map((photo) => (
-          <div
-            key={photo.id}
-            className="floating-photo-card"
-            style={
-              {
-                left: `${photo.left}%`,
-                animationDuration: `${photo.duration}s`,
-                "--rot-start": `${photo.rotStart}deg`,
-                "--rot-end": `${photo.rotEnd}deg`,
-              } as React.CSSProperties
-            }
-          >
-            <div className="photo-card-img-wrap">
-              <img
-                src={photo.photoUrl}
-                alt="Kỷ niệm Duy & Vy"
-                className="photo-card-img"
-                loading="lazy"
-              />
-            </div>
-            <p className="photo-card-caption">{photo.caption}</p>
-            <p className="photo-card-sub">Duy ♥ Vy · Mùa Trăng Đoàn Viên</p>
-          </div>
-        ))}
 
         {/* Nút điều khiển góc phải */}
         <div className="controls">
