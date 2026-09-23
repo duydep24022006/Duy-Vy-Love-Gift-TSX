@@ -742,96 +742,323 @@ button {
   will-change: transform, opacity, filter;
 }
 
-/* ====== KISSING RABBIT CENTER STAGE ====== */
-.kissing-center-stage {
+/* ====== THỎ NGỌC PHÓNG TO & HUN GIÓ RA HÌNH TRÁI TIM ====== */
+.kiss-stage-wrapper {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 31;
+  z-index: 35;
   pointer-events: none;
+  overflow: hidden;
 }
 
-/* Pink/red bloom flash across the whole screen when kiss happens */
+/* Ánh sáng hồng nở bừng trên toàn màn hình */
 .kiss-screen-flash {
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    ellipse at center,
-    rgba(255, 80, 130, 0.22) 0%,
-    rgba(255, 40, 100, 0.10) 45%,
-    transparent 70%
+    circle at 50% 40%,
+    rgba(255, 60, 140, 0.35) 0%,
+    rgba(255, 20, 100, 0.18) 40%,
+    transparent 72%
   );
-  animation: kissScreenFlash 2s ease-in-out forwards;
+  animation: screenFlashLove 2.8s ease-in-out forwards;
+}
+
+/* Sóng xung kích hình tròn hồng mở rộng */
+.kiss-heart-wave {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 105, 180, 0.85);
+  box-shadow: 0 0 20px rgba(255, 20, 147, 0.6);
+  opacity: 0;
+  animation: heartWaveExpand 1.6s ease-out forwards;
+}
+
+.hw-1 { animation-delay: 0.55s; }
+.hw-2 { animation-delay: 0.85s; border-color: rgba(255, 192, 203, 0.9); }
+
+/* Thỏ Ngọc làm diễn viên chính: phóng to ra & làm cử chỉ hun gió */
+.kiss-bunny-performer {
+  position: absolute;
+  left: 50%;
+  top: 64%;
+  transform: translate(-50%, -50%);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: bunnyBlowKissRoutine 2.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+.bunny-actor {
+  position: relative;
+  width: clamp(85px, 17vw, 115px);
+  height: clamp(85px, 17vw, 115px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter:
+    drop-shadow(0 0 22px rgba(255, 220, 80, 0.95))
+    drop-shadow(0 0 50px rgba(255, 120, 0, 0.75));
+}
+
+.bunny-face {
+  position: absolute;
+  font-size: clamp(75px, 15vw, 105px);
+  line-height: 1;
+  user-select: none;
+}
+
+.face-ready {
+  animation: faceReadySwitch 2.8s forwards;
+}
+
+.face-kiss {
+  animation: faceKissSwitch 2.8s forwards;
+}
+
+.face-happy {
+  animation: faceHappySwitch 2.8s forwards;
+}
+
+.bunny-paws {
+  font-size: 26px;
+  margin-top: -8px;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 10px rgba(255, 200, 150, 0.8));
+}
+
+/* Nụ hôn gió: Trái tim phát sáng bay vút từ miệng thỏ lên bầu trời */
+.blown-heart-projectile {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  z-index: 42;
+  animation: blownHeartFly 0.45s 0.32s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  opacity: 0;
   pointer-events: none;
 }
 
-.kissing-rabbit {
-  position: relative;
-  animation: kissingRabbitAnim 2s cubic-bezier(0.22, 0.68, 0.36, 1.1) forwards;
-}
-
-/* Big bunny emoji in center */
-.kiss-bunny {
+.blown-spark-heart {
   display: block;
-  font-size: clamp(80px, 15vw, 120px);
+  font-size: clamp(40px, 8vw, 55px);
   filter:
-    drop-shadow(0 0 22px rgba(255, 225, 80, 1))
-    drop-shadow(0 0 50px rgba(255, 140, 0, 0.8));
+    drop-shadow(0 0 20px rgba(255, 50, 120, 1))
+    drop-shadow(0 0 45px rgba(255, 0, 80, 0.85));
+}
+
+.blown-trail-1, .blown-trail-2 {
+  position: absolute;
+  font-size: 22px;
+  opacity: 0.7;
+}
+.blown-trail-1 { top: 18px; left: -14px; }
+.blown-trail-2 { top: 28px; left: 14px; }
+
+/* Trái tim khổng lồ phát sáng nở bừng ở giữa bầu trời */
+.kiss-giant-center-heart {
+  position: absolute;
+  left: 50%;
+  top: 36%;
+  transform: translate(-50%, -50%);
+  z-index: 38;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: giantCenterHeartBloom 2.8s cubic-bezier(0.2, 0.85, 0.35, 1) forwards;
+  opacity: 0;
+}
+
+.giant-heart-symbol {
+  display: block;
+  font-size: clamp(80px, 16vw, 115px);
   line-height: 1;
+  filter:
+    drop-shadow(0 0 25px rgba(255, 50, 130, 1))
+    drop-shadow(0 0 65px rgba(255, 0, 90, 0.85));
 }
 
-/* Kiss lips — appears upper-right of bunny */
-.kiss-lips {
-  position: absolute;
-  font-size: clamp(40px, 7vw, 58px);
-  top: -18%;
-  right: -28%;
-  animation: kissLipsAnim 2s ease-in-out forwards;
-  transform: scale(0);
-  opacity: 0;
+.giant-heart-tag {
+  margin-top: 6px;
+  padding: 4px 16px;
+  border-radius: 999px;
+  background: rgba(18, 8, 25, 0.75);
+  border: 1.5px solid rgba(255, 215, 0, 0.9);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(255, 105, 180, 0.3);
+  font-size: clamp(0.85rem, 3.2vw, 1.05rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 220, 100, 0.9);
+  white-space: nowrap;
 }
 
-/* Floating hearts — burst outward using CSS custom properties */
-.kiss-heart {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  opacity: 0;
-  /* CSS vars --tx --ty set via inline style from JSX */
-  animation: kissHeartBurst ease-out forwards;
-}
-
-/* Sparkle stars — radiate outward */
-.kiss-sparkle {
+/* Chùm 16 trái tim xếp thành hình trái tim hoàn mỹ */
+.kiss-heart-constellation {
   position: absolute;
   left: 50%;
-  top: 50%;
-  opacity: 0;
-  /* CSS vars --sx --sy set via inline style from JSX */
-  animation: kissSparkleRay ease-out forwards;
-  animation-duration: 1.4s;
+  top: 36%;
+  transform: translate(-50%, -50%);
+  z-index: 37;
+  pointer-events: none;
 }
 
-/* Shockwave rings */
-.kiss-ring {
+.heart-shape-node {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 80px;
-  height: 80px;
-  margin-left: -40px;
-  margin-top: -40px;
-  border-radius: 50%;
-  border: 4px solid;
+  left: 0;
+  top: 0;
   opacity: 0;
-  animation: kissRingExpand ease-out forwards;
+  user-select: none;
+  filter:
+    drop-shadow(0 0 12px rgba(255, 80, 150, 0.9))
+    drop-shadow(0 0 26px rgba(255, 0, 80, 0.6));
+  animation: heartShapeBurst 2.8s cubic-bezier(0.2, 0.85, 0.35, 1.1) forwards;
 }
 
-.kr-1 { border-color: rgba(255,  90, 160, 0.95); animation-delay: 0.12s; animation-duration: 1.0s; }
-.kr-2 { border-color: rgba(255, 215,  30, 0.90); animation-delay: 0.40s; animation-duration: 1.1s; }
-.kr-3 { border-color: rgba(180,  80, 255, 0.80); animation-delay: 0.72s; animation-duration: 1.2s; }
+/* KEYFRAMES FOR BLOWING KISS & HEART SHAPE */
+@keyframes bunnyBlowKissRoutine {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2) rotate(-12deg);
+  }
+  16% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.6) rotate(0deg);
+  }
+  24% {
+    /* Thỏ rướn người chu môi hun gió */
+    transform: translate(-50%, -56%) scale(1.68) rotate(4deg);
+  }
+  38% {
+    /* Thổi nụ hôn gió ra */
+    transform: translate(-50%, -62%) scale(1.72) rotate(-3deg);
+  }
+  50% {
+    /* Nhún người vui sướng ngắm trái tim */
+    transform: translate(-50%, -46%) scale(1.5) rotate(2deg);
+  }
+  75% {
+    opacity: 1;
+    transform: translate(-50%, -46%) scale(1.45) rotate(0deg);
+  }
+  88% {
+    opacity: 0.7;
+    transform: translate(-110%, -110%) scale(0.8) rotate(15deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-170%, -170%) scale(0.3) rotate(30deg);
+  }
+}
+
+@keyframes faceReadySwitch {
+  0%, 20% { opacity: 1; }
+  22%, 100% { opacity: 0; }
+}
+
+@keyframes faceKissSwitch {
+  0%, 21% { opacity: 0; }
+  22%, 42% { opacity: 1; }
+  44%, 100% { opacity: 0; }
+}
+
+@keyframes faceHappySwitch {
+  0%, 43% { opacity: 0; }
+  44%, 100% { opacity: 1; }
+}
+
+@keyframes blownHeartFly {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.25) rotate(-20deg);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -50px) scale(0.85) rotate(8deg);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -135px) scale(1.2) rotate(22deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -160px) scale(1.7) rotate(32deg);
+  }
+}
+
+@keyframes giantCenterHeartBloom {
+  0%, 22% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.35);
+  }
+  42% {
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  54% {
+    transform: translate(-50%, -50%) scale(1.22);
+  }
+  66% {
+    transform: translate(-50%, -50%) scale(1.02);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3) translateY(-40px);
+  }
+}
+
+@keyframes heartShapeBurst {
+  0%, 22% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(0, 0) scale(0.1);
+  }
+  36% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(1.28);
+  }
+  60% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(1.0);
+  }
+  82% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(var(--tx), calc(var(--ty) - 25px)) scale(0.4);
+  }
+}
+
+@keyframes heartWaveExpand {
+  0% {
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3.5);
+    opacity: 0;
+  }
+}
+
+@keyframes screenFlashLove {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  60% { opacity: 0.6; }
+  100% { opacity: 0; }
+}
 
 
 /* 3. CƠN MƯA THIÊN ĐĂNG & ĐÈN ÔNG SAO BAY LÊN TRỜI */

@@ -231,14 +231,14 @@ export default function Home() {
         setIsRabbitFlying(false);
         setIsRabbitKissing(true);
         if (soundOn) playMidAutumnSound("kiss");
-        // Hôn trong 2s rồi thu về góc
+        // Hôn gió trong 2.8s rồi thu về góc
         setTimeout(() => {
           setIsRabbitKissing(false);
           setTimeout(() => {
             setShowBannerCard(true);
             if (soundOn) playMidAutumnSound("lantern");
-          }, 280);
-        }, 2000);
+          }, 350);
+        }, 2800);
       }, 3100);
     }, 1300);
   }, [phase, soundOn]);
@@ -427,56 +427,72 @@ export default function Home() {
           </div>
         )}
 
-        {/* Thỏ đến giữa màn hình — phép thuật WIN: tim bắn 12 hướng, sao vút 8 hướng, sóng xúc động nổ tứa */}
+        {/* Thỏ phóng to ra giữa màn hình + hun gió tạo thành hình trái tim khổng lồ */}
         {isRabbitKissing && (
-          <div className="kissing-center-stage" aria-hidden="true">
-            {/* Screen bloom flash */}
+          <div className="kiss-stage-wrapper" aria-hidden="true">
+            {/* Lớp phủ ánh sáng hồng bùng nổ */}
             <div className="kiss-screen-flash" />
-            {/* 3 expanding shockwave rings */}
-            <div className="kiss-ring kr-1" />
-            <div className="kiss-ring kr-2" />
-            <div className="kiss-ring kr-3" />
-            {/* 8 sparkle stars radiating outward */}
-            {([
-              { e: '✨', sx: '-145px', sy: '-125px', d: '0.20s', s: '28px' },
-              { e: '⭐', sx: '18px',   sy: '-165px', d: '0.30s', s: '32px' },
-              { e: '✨', sx: '155px',  sy: '-105px', d: '0.24s', s: '26px' },
-              { e: '⭐', sx: '165px',  sy: '28px',   d: '0.38s', s: '30px' },
-              { e: '✨', sx: '105px',  sy: '145px',  d: '0.32s', s: '24px' },
-              { e: '⭐', sx: '-28px',  sy: '168px',  d: '0.44s', s: '28px' },
-              { e: '✨', sx: '-155px', sy: '105px',  d: '0.28s', s: '32px' },
-              { e: '⭐', sx: '-165px', sy: '-32px',  d: '0.36s', s: '26px' },
-            ] as const).map((sp, i) => (
-              <span
-                key={i}
-                className="kiss-sparkle"
-                style={{ fontSize: sp.s, animationDelay: sp.d, '--sx': sp.sx, '--sy': sp.sy } as React.CSSProperties}
-              >{sp.e}</span>
-            ))}
-            {/* Bunny + lips + 12 hearts bursting in ALL directions */}
-            <div className="kissing-rabbit">
-              <span className="kiss-bunny">🐰</span>
-              <span className="kiss-lips">😘</span>
+
+            {/* Vòng sóng xung kích trái tim tỏa ra */}
+            <div className="kiss-heart-wave hw-1" />
+            <div className="kiss-heart-wave hw-2" />
+
+            {/* Chùm 16 trái tim nở bùng xếp thành HÌNH TRÁI TIM KHỔNG LỒ */}
+            <div className="kiss-heart-constellation">
               {([
-                { e: '💕', tx: '-95px',  ty: '-115px', d: '0.22s', dur: '1.3s', s: '28px' },
-                { e: '❤️', tx: '0px',    ty: '-148px', d: '0.30s', dur: '1.5s', s: '36px' },
-                { e: '💖', tx: '95px',   ty: '-115px', d: '0.26s', dur: '1.2s', s: '26px' },
-                { e: '💗', tx: '145px',  ty: '0px',    d: '0.40s', dur: '1.4s', s: '32px' },
-                { e: '💝', tx: '105px',  ty: '105px',  d: '0.34s', dur: '1.3s', s: '24px' },
-                { e: '💘', tx: '0px',    ty: '145px',  d: '0.48s', dur: '1.5s', s: '30px' },
-                { e: '💕', tx: '-105px', ty: '105px',  d: '0.36s', dur: '1.2s', s: '26px' },
-                { e: '❤️', tx: '-145px', ty: '0px',    d: '0.42s', dur: '1.4s', s: '34px' },
-                { e: '💖', tx: '-68px',  ty: '-136px', d: '0.24s', dur: '1.1s', s: '22px' },
-                { e: '💗', tx: '68px',   ty: '-136px', d: '0.52s', dur: '1.3s', s: '28px' },
-                { e: '💝', tx: '136px',  ty: '-68px',  d: '0.28s', dur: '1.2s', s: '20px' },
-                { e: '💘', tx: '-136px', ty: '-68px',  d: '0.46s', dur: '1.4s', s: '24px' },
+                { e: '❤️', x: '0px',    y: '-65px',  d: '0.36s', s: '30px' },
+                { e: '💖', x: '45px',   y: '-110px', d: '0.40s', s: '34px' },
+                { e: '💕', x: '95px',   y: '-120px', d: '0.44s', s: '32px' },
+                { e: '💗', x: '140px',  y: '-80px',  d: '0.48s', s: '34px' },
+                { e: '💓', x: '155px',  y: '-25px',  d: '0.52s', s: '36px' },
+                { e: '💘', x: '135px',  y: '30px',   d: '0.56s', s: '32px' },
+                { e: '💝', x: '90px',   y: '80px',   d: '0.60s', s: '34px' },
+                { e: '💞', x: '45px',   y: '120px',  d: '0.64s', s: '30px' },
+                { e: '❤️', x: '0px',    y: '155px',  d: '0.68s', s: '38px' }, // Đáy nhọn trái tim
+                { e: '💞', x: '-45px',  y: '120px',  d: '0.64s', s: '30px' },
+                { e: '💝', x: '-90px',  y: '80px',   d: '0.60s', s: '34px' },
+                { e: '💘', x: '-135px', y: '30px',   d: '0.56s', s: '32px' },
+                { e: '💓', x: '-155px', y: '-25px',  d: '0.52s', s: '36px' },
+                { e: '💗', x: '-140px', y: '-80px',  d: '0.48s', s: '34px' },
+                { e: '💕', x: '-95px',  y: '-120px', d: '0.44s', s: '32px' },
+                { e: '💖', x: '-45px',  y: '-110px', d: '0.40s', s: '34px' },
               ] as const).map((h, i) => (
                 <span
                   key={i}
-                  className="kiss-heart"
-                  style={{ fontSize: h.s, animationDelay: h.d, animationDuration: h.dur, '--tx': h.tx, '--ty': h.ty } as React.CSSProperties}
-                >{h.e}</span>
+                  className="heart-shape-node"
+                  style={{
+                    fontSize: h.s,
+                    animationDelay: h.d,
+                    '--tx': h.x,
+                    '--ty': h.y,
+                  } as React.CSSProperties}
+                >
+                  {h.e}
+                </span>
               ))}
+            </div>
+
+            {/* Trái tim khổng lồ phát sáng rực rỡ ở chính giữa bung ra từ nụ hôn gió */}
+            <div className="kiss-giant-center-heart">
+              <span className="giant-heart-symbol">💖</span>
+              <div className="giant-heart-tag">Duy ♥ Vy</div>
+            </div>
+
+            {/* Trái tim phát sáng bay vút ra từ miệng thỏ khi hun gió */}
+            <div className="blown-heart-projectile">
+              <span className="blown-spark-heart">💖</span>
+              <span className="blown-trail-1">💕</span>
+              <span className="blown-trail-2">💗</span>
+            </div>
+
+            {/* Chú Thỏ Ngọc phóng to ra làm hoạt ảnh hun gió */}
+            <div className="kiss-bunny-performer">
+              <div className="bunny-actor">
+                <span className="bunny-face face-ready">🐰</span>
+                <span className="bunny-face face-kiss">😚</span>
+                <span className="bunny-face face-happy">🥰</span>
+              </div>
+              <div className="bunny-paws">🐾</div>
             </div>
           </div>
         )}
