@@ -634,10 +634,67 @@ export default function Home() {
   const [isRabbitFlying, setIsRabbitFlying] = useState(false);
   const [isRabbitKissing, setIsRabbitKissing] = useState(false);
   const [showBannerCard, setShowBannerCard] = useState(false);
+  const [floatingPhotos, setFloatingPhotos] = useState<
+    Array<{
+      id: number;
+      photoUrl: string;
+      caption: string;
+      left: number;
+      duration: number;
+      rotStart: number;
+      rotEnd: number;
+    }>
+  >([]);
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bgmAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // 28 Bức ảnh kỷ niệm của Duy & Vy tải từ Google Drive
+  const totalPhotos = 28;
+  const coupleLoveCaptions = useMemo(
+    () => [
+      "Duy thương Vy nhất trần đời ♥",
+      "Nụ cười của Vy sáng hơn cả trăng rằm ✨",
+      "Bé Vy bướng nhưng Duy thương nhất trần đời 🐰",
+      "Cùng Vy rước đèn qua thật nhiều mùa trăng 🏮",
+      "Kỷ niệm ngọt ngào của chúng mình 💖",
+      "Công chúa thỏ ngọc đáng yêu của Duy 🥮",
+      "Ước cho Vy luôn hạnh phúc và mãi bên Duy!",
+      "Mỗi khoảnh khắc bên em đều là phép màu 🌸",
+      "Đêm rằm có Chị Hằng, đời Duy có bé Vy 🌙",
+      "Yêu Vy nhiều hơn ngày hôm qua ♥",
+      "Hạnh phúc là từng phút giây ở cạnh Vy 💫",
+      "Trung Thu đoàn viên, ngọt ngào bên Vy 🏮",
+    ],
+    []
+  );
+
+  const spawnFloatingPhoto = useCallback(
+    (clientX?: number) => {
+      const photoNum = Math.floor(Math.random() * totalPhotos) + 1;
+      const captionIdx = Math.floor(Math.random() * coupleLoveCaptions.length);
+
+      let leftPercent = 15 + Math.random() * 60;
+      if (clientX && typeof window !== "undefined") {
+        leftPercent = Math.max(10, Math.min(75, (clientX / window.innerWidth) * 100));
+      }
+
+      const newPhoto = {
+        id: Date.now() + Math.random(),
+        photoUrl: `/photos/photo_${photoNum}.jpg`,
+        caption: coupleLoveCaptions[captionIdx],
+        left: leftPercent,
+        duration: 8 + Math.random() * 3, // 8s - 11s bay bổng từ từ lên trời
+        rotStart: (Math.random() - 0.5) * 8,
+        rotEnd: (Math.random() - 0.5) * 10,
+      };
+
+      setFloatingPhotos((prev) => [...prev.slice(-15), newPhoto]);
+      if (soundOn) playMidAutumnSound("hop");
+    },
+    [coupleLoveCaptions, soundOn]
+  );
 
   // Background stars
   const stars = useMemo(
@@ -778,7 +835,7 @@ export default function Home() {
     if (soundOn) playMidAutumnSound("hop");
   };
 
-  // Release a new sky lantern
+  // Release a new sky lantern + ngẫu nhiên bay 1 bức ảnh kỷ niệm
   const releaseLantern = () => {
     if (soundOn) playMidAutumnSound("lantern");
     const newLantern: CustomLantern = {
@@ -792,6 +849,8 @@ export default function Home() {
     setExtraLanterns((prev) => [...prev.slice(-15), newLantern]);
     // Also cycle wish in ribbon
     setActiveWishIndex((prev) => (prev + 1) % midAutumnWishes.length);
+    // Bật một bức ảnh kỷ niệm bay lên trời
+    spawnFloatingPhoto();
   };
 
   return (
@@ -918,6 +977,16 @@ export default function Home() {
       <section
         className={`moonlight-scene ${phase === "moonlight" ? "is-visible" : ""}`}
         aria-hidden={phase !== "moonlight"}
+        onPointerDown={(e) => {
+          const target = e.target as HTMLElement | null;
+          if (
+            target?.closest("button") ||
+            target?.closest(".floating-lantern-item.is-held")
+          ) {
+            return;
+          }
+          spawnFloatingPhoto(e.clientX);
+        }}
       >
         {/* Canvas Engine Xử Lý Trái Tim Hạt Đỏ (Ảnh 2) & Đuôi Trái Tim Thỏ Bay (Ảnh 1) */}
         <LoveParticleCanvas
@@ -1092,6 +1161,33 @@ export default function Home() {
             📜 Xem thiệp chúc Trung Thu của Duy
           </button>
         ) : null}
+
+        {/* 6. BỘ SƯU TẬP 28 ẢNH KỶ NIỆM CỦA DUY & VY BAY TỪ DƯỚI LÊN KHI ẤN BẤT KỲ ĐÂU */}
+        {floatingPhotos.map((photo) => (
+          <div
+            key={photo.id}
+            className="floating-photo-card"
+            style={
+              {
+                left: `${photo.left}%`,
+                animationDuration: `${photo.duration}s`,
+                "--rot-start": `${photo.rotStart}deg`,
+                "--rot-end": `${photo.rotEnd}deg`,
+              } as React.CSSProperties
+            }
+          >
+            <div className="photo-card-img-wrap">
+              <img
+                src={photo.photoUrl}
+                alt="Kỷ niệm Duy & Vy"
+                className="photo-card-img"
+                loading="lazy"
+              />
+            </div>
+            <p className="photo-card-caption">{photo.caption}</p>
+            <p className="photo-card-sub">Duy ♥ Vy · Mùa Trăng Đoàn Viên</p>
+          </div>
+        ))}
 
         {/* Nút điều khiển góc phải */}
         <div className="controls">
