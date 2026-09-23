@@ -2010,23 +2010,25 @@ button {
   }
 
   /* Floating Ribbon Card — cách đáy ~2cm (phù hợp iPhone 14 Pro Max) */
-  .moon-ribbon-scroll {
-    left: 50%;
-    /* Dùng bottom thay top để neo sát đáy màn hình, cách ~75px = ~2cm */
+  /* Dùng compound selector để override top:48% từ .hanging-banner-drop desktop */
+  .moon-ribbon-scroll,
+  .moon-ribbon-scroll.hanging-banner-drop {
+    left: 50% !important;
     top: auto !important;
-    bottom: max(78px, calc(env(safe-area-inset-bottom) + 66px));
+    bottom: max(78px, calc(env(safe-area-inset-bottom) + 66px)) !important;
     transform: translateX(-50%) !important;
     width: calc(100vw - 28px);
     max-width: 440px;
     padding: 15px 14px 13px;
     border-radius: 20px;
+    transform-origin: bottom center !important;
   }
 
   /* Override animation để phù hợp với bottom-anchored (không cần dịch Y) */
   .moon-ribbon-scroll.hanging-banner-drop {
     animation:
       bannerDropMobile 1.1s cubic-bezier(0.175, 0.885, 0.32, 1.22) forwards,
-      bannerDangleMobile 4.2s 1.1s ease-in-out infinite alternate;
+      bannerDangleMobile 4.2s 1.1s ease-in-out infinite alternate !important;
   }
 
   @keyframes bannerDropMobile {
